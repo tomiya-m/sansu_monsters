@@ -1,1 +1,0 @@
-# sansu_monsters
