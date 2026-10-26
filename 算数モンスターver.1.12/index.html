@@ -1,0 +1,2330 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>算数モンスターズ＆ファンシーフレンズ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap');
+        body { font-family: 'M PLUS Rounded 1c', sans-serif; transition: background 0.5s ease; }
+        
+        .theme-default { background: linear-gradient(135deg, #312e81, #581c87, #831843); }
+        .theme-yumekawa { background: linear-gradient(135deg, #f472b6, #c084fc, #38bdf8); }
+        .theme-ocean { background: linear-gradient(135deg, #0369a1, #0e7490, #15803d); }
+        .theme-volcano { background: linear-gradient(135deg, #7f1d1d, #9a3412, #78350f); }
+        .theme-galaxy { background: linear-gradient(135deg, #09090b, #3b0764, #1e1b4b); }
+        .theme-rainbow {
+            background: linear-gradient(135deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
+            background-size: 400% 400%;
+            animation: rainbow-bg 8s ease infinite;
+        }
+        .theme-god {
+            background: linear-gradient(135deg, #fef08a, #f59e0b, #b45309, #78350f, #fef08a);
+            background-size: 300% 300%;
+            animation: god-bg 5s ease infinite;
+        }
+
+        .theme-boss1 { background: linear-gradient(135deg, #db2777, #f43f5e, #fb7185); }
+        .theme-boss2 { background: linear-gradient(135deg, #0284c7, #0ea5e9, #38bdf8); }
+        .theme-boss3 { background: linear-gradient(135deg, #c2410c, #ea580c, #f97316); }
+        .theme-boss4 { background: linear-gradient(135deg, #7c3aed, #9333ea, #a855f7); }
+
+        @keyframes rainbow-bg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes god-bg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        ruby { ruby-position: over; }
+        rt { font-size: 0.55em; color: #fef08a; font-weight: normal; }
+
+        .holo-card {
+            background: linear-gradient(135deg, rgba(255,0,128,0.3) 0%, rgba(255,215,0,0.5) 25%, rgba(0,255,255,0.4) 50%, rgba(128,0,255,0.4) 75%, rgba(255,0,128,0.3) 100%);
+            background-size: 300% 300%;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), inset 0 0 10px rgba(255,255,255,0.6);
+            animation: holo-shimmer 2.5s infinite linear;
+        }
+        @keyframes holo-shimmer {
+            0% { background-position: 0% 50%; filter: brightness(1.1) contrast(1.1); }
+            50% { background-position: 100% 50%; filter: brightness(1.3) contrast(1.2); }
+            100% { background-position: 0% 50%; filter: brightness(1.1) contrast(1.1); }
+        }
+
+        @keyframes toast-in-out {
+            0% { opacity: 0; transform: translate(-50%, -60%) scale(0.8); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -40%) scale(0.9); }
+        }
+        .toast-popup { animation: toast-in-out 1.8s forwards ease-in-out; }
+        
+        @keyframes epic-flash {
+            0% { background-color: rgba(255,215,0,0); transform: scale(0.95); }
+            50% { background-color: rgba(255,215,0,0.4); transform: scale(1.02); }
+            100% { background-color: rgba(255,215,0,0); transform: scale(1); }
+        }
+        .epic-encounter { animation: epic-flash 0.8s ease-in-out; }
+
+        @keyframes celebrate-pop {
+            0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+            50% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+            70% { transform: scale(0.95) rotate(-2deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        .celebrate-anim { animation: celebrate-pop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    </style>
+</head>
+<body id="body-theme" class="theme-default min-h-screen text-white select-none relative">
+
+    <div id="toast-container" class="fixed top-1/2 left-1/2 z-50 pointer-events-none hidden">
+        <div id="toast-content" class="toast-popup bg-black/85 backdrop-blur-md border-2 border-yellow-400 px-8 py-6 rounded-3xl text-center shadow-2xl min-w-[300px]">
+            <div id="toast-icon" class="text-6xl mb-2 animate-bounce">🎉</div>
+            <div id="toast-title" class="text-2xl font-black text-yellow-300">ゲット！</div>
+            <div id="toast-body" class="text-sm text-purple-100 mt-1">メッセージ</div>
+        </div>
+    </div>
+
+    <div id="screen-fx-layer" class="fixed inset-0 pointer-events-none z-40 hidden flex items-center justify-center">
+        <div id="fx-inner-content" class="text-center p-8 rounded-3xl bg-black/80 border-4 border-yellow-300 shadow-2xl transform scale-125 transition-all">
+            <div id="fx-emoji" class="text-8xl mb-3 animate-bounce">✨</div>
+            <div id="fx-title" class="text-3xl font-black text-yellow-300"><ruby>遭遇<rt>そうぐう</rt></ruby>！！</div>
+            <div id="fx-desc" class="text-sm text-white mt-2">いろちがいの<ruby>伝説<rt>でんせつ</rt></ruby>モンスターがあらわれた！</div>
+        </div>
+    </div>
+
+    <div id="modal-celebrate" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
+        <div class="celebrate-anim bg-gradient-to-br from-amber-900 via-purple-900 to-indigo-950 border-4 border-yellow-300 p-8 rounded-3xl max-w-lg w-full text-center relative shadow-2xl">
+            <div class="text-7xl mb-3 animate-bounce">👑🎉🏆</div>
+            <h2 id="cel-title" class="text-3xl font-black text-yellow-300 mb-2">図鑑コンプリートおめでとう！！</h2>
+            <p id="cel-body" class="text-base text-purple-100 mb-6 leading-relaxed">
+                すばらしい計算力で見事に全モンスターをコンプリートしました！君こそ真の算数マスターだ！
+            </p>
+            <button onclick="closeCelebrateModal()" class="bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black text-lg px-8 py-3 rounded-2xl shadow-xl hover:scale-105 transition transform">
+                やったー！！
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let bgmInterval = null;
+        let isBgmPlaying = false;
+        let currentBgmMode = 'home';
+
+        function toggleBgm() {
+            isBgmPlaying = !isBgmPlaying;
+            let btn = document.getElementById('bgm-toggle-btn');
+            if (isBgmPlaying) {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                btn.innerHTML = '🎵 BGM: ON';
+                btn.className = 'bg-green-500/30 border border-green-400 text-green-200 px-2.5 py-1 rounded-full text-xs font-bold transition flex items-center space-x-1';
+                startBgmLoop(currentBgmMode);
+            } else {
+                btn.innerHTML = '🔇 BGM: OFF';
+                btn.className = 'bg-red-500/30 border border-red-400 text-red-200 px-2.5 py-1 rounded-full text-xs font-bold transition flex items-center space-x-1';
+                stopBgmLoop();
+            }
+        }
+
+        function changeBgmMode(mode) {
+            currentBgmMode = mode;
+            if (isBgmPlaying) {
+                stopBgmLoop();
+                startBgmLoop(mode);
+            }
+        }
+
+        function startBgmLoop(mode) {
+            if (bgmInterval) clearInterval(bgmInterval);
+            let notes = [];
+            let tempo = 400;
+
+            if (mode === 'home' || mode === 'forest') {
+                notes = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63];
+                tempo = 450;
+            } else if (mode === 'ocean') {
+                notes = [220.00, 277.18, 329.63, 440.00, 329.63, 277.18];
+                tempo = 500;
+            } else if (mode === 'volcano') {
+                notes = [220.00, 261.63, 311.13, 349.23, 311.13, 261.63];
+                tempo = 320;
+            } else if (mode === 'sky') {
+                notes = [392.00, 493.88, 587.33, 783.99, 587.33, 493.88];
+                tempo = 400;
+            } else if (mode === 'boss') {
+                notes = [150.00, 220.00, 150.00, 300.00, 277.18, 220.00];
+                tempo = 220;
+            }
+
+            let idx = 0;
+            bgmInterval = setInterval(() => {
+                if (!isBgmPlaying) return;
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    const now = audioCtx.currentTime;
+
+                    osc.type = mode === 'boss' ? 'sawtooth' : 'sine';
+                    osc.frequency.setValueAtTime(notes[idx % notes.length], now);
+                    gain.gain.setValueAtTime(0.04, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + (tempo / 1000) * 0.8);
+
+                    osc.start(now);
+                    osc.stop(now + (tempo / 1000) * 0.8);
+                    idx++;
+                } catch(e) {}
+            }, tempo);
+        }
+
+        function stopBgmLoop() {
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
+            }
+        }
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.setValueAtTime(659.25, now + 0.1);
+                osc.frequency.setValueAtTime(783.99, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'critical') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.3);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.setValueAtTime(100, now + 0.15);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'catch') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.3);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            } else if (type === 'shiny' || type === 'fanfare' || type === 'super_lucky') {
+                osc.type = 'sine';
+                for(let i=0; i<10; i++) {
+                    osc.frequency.setValueAtTime(300 + i*180, now + i*0.06);
+                }
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+                osc.start(now);
+                osc.stop(now + 0.8);
+            } else if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            }
+        }
+
+        function showToast(icon, title, body, duration = 1600, callback = null) {
+            const container = document.getElementById('toast-container');
+            document.getElementById('toast-icon').innerText = icon;
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-body').innerText = body;
+            container.classList.remove('hidden');
+            setTimeout(() => {
+                container.classList.add('hidden');
+                if (callback) callback();
+            }, duration);
+        }
+
+        function showEpicFX(emoji, title, desc, callback = null) {
+            const fxLayer = document.getElementById('screen-fx-layer');
+            document.getElementById('fx-emoji').innerText = emoji;
+            document.getElementById('fx-title').innerText = title;
+            document.getElementById('fx-desc').innerText = desc;
+            document.body.classList.add('epic-encounter');
+            fxLayer.classList.remove('hidden');
+            setTimeout(() => {
+                fxLayer.classList.add('hidden');
+                document.body.classList.remove('epic-encounter');
+                if(callback) callback();
+            }, 2000);
+        }
+    </script>
+
+    <div id="app" class="max-w-5xl mx-auto p-3 sm:p-4 pb-12">
+        <header class="flex flex-wrap justify-between items-center bg-black/40 backdrop-blur-md p-3 sm:p-4 rounded-2xl mb-4 shadow-xl border border-white/10">
+            <div class="flex items-center space-x-3">
+                <span class="text-2xl sm:text-3xl animate-bounce">🏰</span>
+                <div>
+                    <h1 class="text-base sm:text-lg font-extrabold bg-gradient-to-r from-pink-400 via-yellow-300 to-cyan-400 bg-clip-text text-transparent"><ruby>算数<rt>さんすう</rt></ruby>モンスターズ＆ファンシーフレンズ</h1>
+                    <p class="text-[11px] text-purple-200" id="header-status">Lv.1 | EXP: 0/50</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-1.5 sm:space-x-2 mt-2 sm:mt-0 text-xs">
+                <button id="bgm-toggle-btn" onclick="toggleBgm()" class="bg-red-500/30 border border-red-400 text-red-200 px-2.5 py-1 rounded-full text-xs font-bold transition flex items-center space-x-1">
+                    <span>🔇 BGM: OFF</span>
+                </button>
+                <div class="bg-yellow-500/20 border border-yellow-400/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full flex items-center space-x-1">
+                    <span>🪙</span> <span id="player-coins" class="font-bold text-yellow-300">0</span>
+                </div>
+                <div class="bg-pink-500/20 border border-pink-400/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full flex items-center space-x-1">
+                    <span>💎</span> <span id="player-gems" class="font-bold text-pink-300">0</span>
+                </div>
+                <div class="bg-indigo-500/20 border border-indigo-400/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full flex items-center space-x-1">
+                    <span>🌈</span> <span id="player-rainbow-pieces" class="font-bold text-indigo-300">0</span>
+                </div>
+            </div>
+        </header>
+
+        <main id="main-container">
+            <!-- ホーム画面 -->
+            <div id="screen-home" class="space-y-4">
+                <div class="bg-gradient-to-r from-purple-900/60 via-indigo-900/60 to-blue-900/60 backdrop-blur-md p-4 rounded-3xl border border-white/20 shadow-xl text-center space-y-1">
+                    <h2 class="text-sm sm:text-base font-black text-yellow-300">✨ 遊び方 ＆ ルール ✨</h2>
+                    <p class="text-[11px] sm:text-xs text-purple-100 leading-relaxed">
+                        すきなエリアをえらんで、算数のもんだいを素早く解いてモンスターを攻撃しよう！<br>
+                        HPを削ったらボールを投げてゲット！集めたモンスターや「虹のかけら」で相棒を強力に育てよう！
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="md:col-span-2 bg-white/10 backdrop-blur-md p-4 rounded-3xl border border-white/20 shadow-xl relative overflow-hidden">
+                        <div class="flex justify-between items-center mb-2">
+                            <h2 class="text-base sm:text-lg font-black text-yellow-300"><ruby>冒険<rt>ぼうけん</rt></ruby>エリアを<ruby>選<rt>えら</rt></ruby>ぼう</h2>
+                            <span class="text-[10px] text-purple-200">💎シーズン1限定★5高確率中！</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="selectArea(1)" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 p-3 rounded-2xl font-bold shadow-md text-left flex items-center justify-between border border-emerald-300/30">
+                                <div>
+                                    <div class="text-xs sm:text-sm font-bold">🌿 1<ruby>年<rt>ねん</rt></ruby>: 森</div>
+                                    <div class="text-[10px] text-emerald-200">10の補数・足し算・引き算 (💎50%)</div>
+                                </div>
+                                <span class="text-xl">🌲</span>
+                            </button>
+                            <button onclick="selectArea(2)" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 p-3 rounded-2xl font-bold shadow-md text-left flex items-center justify-between border border-blue-300/30">
+                                <div>
+                                    <div class="text-xs sm:text-sm font-bold">🌊 2<ruby>年<rt>ねん</rt></ruby>: 海</div>
+                                    <div class="text-[10px] text-blue-200">九九・穴埋め ＋ 筆算基礎 (💎50%)</div>
+                                </div>
+                                <span class="text-xl">🐳</span>
+                            </button>
+                            <button onclick="selectArea(3)" class="bg-gradient-to-r from-orange-500 to-amber-600 hover:opacity-90 p-3 rounded-2xl font-bold shadow-md text-left flex items-center justify-between border border-orange-300/30">
+                                <div>
+                                    <div class="text-xs sm:text-sm font-bold">🔥 3<ruby>年<rt>ねん</rt></ruby>: 火山</div>
+                                    <div class="text-[10px] text-orange-200">あまりのある割り算 ＋ 複合 (💎75%)</div>
+                                </div>
+                                <span class="text-xl">🌋</span>
+                            </button>
+                            <button onclick="selectArea(4)" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 p-3 rounded-2xl font-bold shadow-md text-left flex items-center justify-between border border-pink-300/30">
+                                <div>
+                                    <div class="text-xs sm:text-sm font-bold">高学年: 天空城</div>
+                                    <div class="text-[10px] text-yellow-300 font-extrabold">💎100%確定!</div>
+                                </div>
+                                <span class="text-xl">👑</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-red-950/90 via-purple-950/90 to-amber-950/90 p-4 rounded-3xl border-2 border-red-500/50 shadow-xl flex flex-col justify-between text-center relative overflow-hidden">
+                        <div>
+                            <span class="bg-red-600 text-white text-[9px] px-2 py-0.5 rounded-full font-black uppercase">End Content</span>
+                            <h3 class="text-base font-black text-yellow-300 mt-1"><ruby>学年別<rt>がくねんべつ</rt></ruby>ボスバトル</h3>
+                            <p class="text-[11px] text-purple-200 mt-0.5">相棒を育ててボスを撃破し、限定テーマ＆称号をGET！</p>
+                        </div>
+                        <button onclick="switchScreen('boss')" class="mt-3 w-full bg-gradient-to-r from-red-600 to-amber-600 hover:opacity-90 py-2.5 rounded-2xl font-black text-xs text-white shadow-lg">
+                            ⚔️ ボス戦に挑む！
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                    <button onclick="switchScreen('pokedex')" class="bg-white/10 hover:bg-white/20 p-3 rounded-2xl font-bold border border-white/20 flex flex-col items-center justify-center transition relative text-xs">
+                        <span class="text-2xl mb-1">📖</span>
+                        <span>モンスターずかん</span>
+                        <span id="home-crown-badge" class="hidden absolute top-2 right-2 text-lg">👑</span>
+                    </button>
+                    <button onclick="switchScreen('shop')" class="bg-white/10 hover:bg-white/20 p-3 rounded-2xl font-bold border border-white/20 flex flex-col items-center justify-center transition text-xs">
+                        <span class="text-2xl mb-1">🛒</span>
+                        <span>ショップ / 💎こうかん</span>
+                    </button>
+                    <button onclick="switchScreen('skills')" class="bg-white/10 hover:bg-white/20 p-3 rounded-2xl font-bold border border-white/20 flex flex-col items-center justify-center transition text-xs">
+                        <span class="text-2xl mb-1">⭐</span>
+                        <span>のうりょく育成 (SP:<span id="sp-count">0</span>)</span>
+                    </button>
+                    <button onclick="switchScreen('treasures')" class="bg-white/10 hover:bg-white/20 p-3 rounded-2xl font-bold border border-white/20 flex flex-col items-center justify-center transition text-xs">
+                        <span class="text-2xl mb-1">💎</span>
+                        <span>ほうもつコレクション</span>
+                    </button>
+                    <button onclick="switchScreen('titles')" class="col-span-2 sm:col-span-1 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:bg-amber-500/30 p-3 rounded-2xl font-bold border border-amber-400/40 flex flex-col items-center justify-center transition text-xs">
+                        <span class="text-2xl mb-1">👑</span>
+                        <span>称号・スキンルーム</span>
+                    </button>
+                </div>
+
+                <!-- ホーム下部：フィールド毎の確率詳細一覧 -->
+                <div class="bg-black/40 backdrop-blur-md p-4 rounded-3xl border border-white/10 space-y-3 text-xs">
+                    <h3 class="font-extrabold text-sm text-yellow-300 flex items-center space-x-1">
+                        <span>📊</span> <span>フィールド別 モンスター＆ドロップ出現確率</span>
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-[11px]">
+                        <div class="bg-white/5 p-2.5 rounded-xl border border-emerald-500/30 space-y-1">
+                            <div class="font-bold text-emerald-300">🌲 1年: 森のフィールド</div>
+                            <div>・★1: <span class="text-yellow-200">60%</span> / ★2: <span class="text-yellow-200">30%</span></div>
+                            <div>・★3: <span class="text-yellow-200">8%</span> / ★4: <span class="text-yellow-200">2%</span></div>
+                            <div>・💎獲得率: <span class="text-pink-300">50%</span> (1個)</div>
+                        </div>
+                        <div class="bg-white/5 p-2.5 rounded-xl border border-blue-500/30 space-y-1">
+                            <div class="font-bold text-blue-300">🐳 2年: 海のフィールド</div>
+                            <div>・★1: <span class="text-yellow-200">40%</span> / ★2: <span class="text-yellow-200">35%</span></div>
+                            <div>・★3: <span class="text-yellow-200">18%</span> / ★4: <span class="text-yellow-200">7%</span></div>
+                            <div>・💎獲得率: <span class="text-pink-300">50%</span> (1個)</div>
+                        </div>
+                        <div class="bg-white/5 p-2.5 rounded-xl border border-orange-500/30 space-y-1">
+                            <div class="font-bold text-orange-300">🌋 3年: 火山フィールド</div>
+                            <div>・★1: <span class="text-yellow-200">20%</span> / ★2: <span class="text-yellow-200">35%</span></div>
+                            <div>・★3: <span class="text-yellow-200">30%</span> / ★4: <span class="text-yellow-200">15%</span></div>
+                            <div>・💎獲得率: <span class="text-pink-300">75%</span> (1個)</div>
+                        </div>
+                        <div class="bg-white/5 p-2.5 rounded-xl border border-purple-500/30 space-y-1">
+                            <div class="font-bold text-purple-300">👑 高学年: 天空城</div>
+                            <div>・★1: <span class="text-yellow-200">10%</span> / ★2: <span class="text-yellow-200">20%</span></div>
+                            <div>・★3: <span class="text-yellow-200">35%</span> / ★4: <span class="text-yellow-200">35%</span></div>
+                            <div>・💎獲得率: <span class="text-pink-300">100%</span> (1〜3個)</div>
+                        </div>
+                    </div>
+                    <div class="bg-black/30 p-2.5 rounded-xl border border-white/5 flex flex-wrap justify-between gap-2 text-[11px] text-purple-200">
+                        <div>✨ <span class="font-bold text-white">シャイニー遭遇率</span>: 1% (捕獲数120種以上で最大10%まで上昇) / ★5(S1限定)発生: 4% (※No.101〜120シークレットは図鑑1〜100完成後全フィールド4%出現)</div>
+                        <div>💎 <span class="font-bold text-white">ほうもつドロップ率</span>: 1%</div>
+                        <div>🎁 <span class="font-bold text-white">ボール・アイテムドロップ率</span>: 5% (スキルLVで増加)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- バトル・計算画面 -->
+            <div id="screen-battle" class="hidden space-y-4">
+                <div id="battle-box-container" class="bg-white/10 backdrop-blur-md p-6 rounded-3xl border-2 border-white/20 text-center shadow-2xl relative transition-all duration-500">
+                    <div class="flex justify-between items-center mb-4 gap-2">
+                        <button onclick="confirmReturnHome()" class="bg-blue-600/40 hover:bg-blue-600/70 border border-blue-400 text-blue-200 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1">
+                            <span>🏠</span>
+                            <span>ホームにもどる</span>
+                        </button>
+                        <div class="flex items-center space-x-2">
+                            <span id="battle-area-label" class="bg-purple-600/60 px-3 py-1 rounded-full text-xs font-bold">エリア</span>
+                            <span id="monster-type-badge" class="px-2.5 py-0.5 rounded-full text-xs font-black shadow-md">タイプ</span>
+                        </div>
+                        <span id="monster-rarity-badge" class="bg-yellow-500 text-black px-2 py-0.5 rounded text-xs font-extrabold">★1</span>
+                    </div>
+
+                    <div id="monster-display-box" class="relative my-4 p-4 flex flex-col items-center justify-center">
+                        <div id="shiny-particle-layer" class="absolute inset-0 pointer-events-none flex items-center justify-center"></div>
+                        <div id="monster-svg-container" class="w-44 h-44 flex items-center justify-center filter drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] transform transition hover:scale-105"></div>
+                        <h3 id="monster-name" class="text-xl font-bold mt-2 text-yellow-200">モンスター名</h3>
+                        <p id="monster-flavor" class="text-xs text-purple-200 italic mt-1 max-w-md">モンスターの説明文</p>
+                        
+                        <div class="flex items-center space-x-2 mt-2">
+                            <span id="caught-status-normal" class="text-[11px] px-2.5 py-0.5 rounded-full bg-black/50 border border-white/20 text-purple-200 font-bold">📖 登録: 未発見</span>
+                            <span id="caught-status-shiny" class="text-[11px] px-2.5 py-0.5 rounded-full bg-black/50 border border-pink-400/40 text-pink-300 font-bold">✨ 色違い: 未発見</span>
+                        </div>
+
+                        <div class="w-full max-w-xs bg-black/40 rounded-full h-4 mt-3 border border-white/20 overflow-hidden">
+                            <div id="monster-hp-bar" class="bg-gradient-to-r from-green-400 to-emerald-500 h-full transition-all duration-300" style="width: 100%;"></div>
+                        </div>
+                        <span id="monster-hp-text" class="text-xs font-bold mt-1">HP: 20/20</span>
+                    </div>
+
+                    <div id="math-problem-box" class="bg-black/30 p-5 rounded-2xl border border-white/10 max-w-md mx-auto">
+                        <div id="problem-text" class="text-3xl font-black mb-1 tracking-wider text-cyan-300">5 + 3 = ?</div>
+                        <div id="crit-timer-display" class="text-xs font-bold text-yellow-300 mb-3 h-5 flex items-center justify-center space-x-1">
+                            <span>⚡ CRITICAL<ruby>判定<rt>はんてい</rt></ruby>:</span>
+                            <span id="crit-timer-sec" class="text-sm font-black text-pink-300">5.0</span>
+                            <span><ruby>秒以内<rt>びょういいない</rt></ruby></span>
+                        </div>
+                        
+                        <div class="flex justify-center items-center space-x-2 mb-4">
+                            <input type="number" id="answer-input" readonly class="w-36 text-center text-3xl font-bold bg-white/10 border-2 border-cyan-400/60 rounded-xl py-2 text-white focus:outline-none" placeholder="?">
+                            <button id="btn-submit-ans" onclick="submitAnswer()" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 px-6 py-3 rounded-xl font-black text-lg shadow-lg">こたえ</button>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 max-w-xs mx-auto">
+                            <button onclick="inputNum(1)" class="bg-white/10 hover:bg-white/20 py-2 rounded-lg text-xl font-bold">1</button>
+                            <button onclick="inputNum(2)" class="bg-white/10 hover:bg-white/20 py-2 rounded-lg text-xl font-bold">2</button>
+                            <button onclick="inputNum(3)" class="bg-white/10 hover:bg-white/20 py-2 rounded-lg text-xl font-bold">3</button>
+                            <button onclick="inputNum(4)" class="bg-white/10 hover:bg-white/20 py-2 rounded-lg text-xl font-bold">4</button>
+                            <button onclick="inputNum(5)" class="bg-white/10 hover:bg-white/20 py-2 rounded-lg text-xl font-bold">5</button>
+                            <button onclick="inputNum(6)" class="bg-white/10 hover:bg-white/20 py-2 rounded-lg text-xl font-bold">6</button>
+                            <button onclick="inputNum(7)" class="bg-white/10 hover:bg-white/20 py-2 rounded-lg text-xl font-bold">7</button>
+                            <button onclick="inputNum(8)" class="bg-white/10 hover:bg-white/20 py-2 rounded-lg text-xl font-bold">8</button>
+                            <button onclick="inputNum(9)" class="bg-white/10 hover:bg-white/20 py-2 rounded-lg text-xl font-bold">9</button>
+                            <button onclick="inputNum('clear')" class="bg-red-500/20 hover:bg-red-500/30 py-2 rounded-lg text-sm font-bold text-red-300">けす</button>
+                            <button onclick="inputNum(0)" class="bg-white/10 hover:bg-white/20 py-2 rounded-lg text-xl font-bold">0</button>
+                            <button onclick="inputNum('minus')" class="bg-white/10 hover:bg-white/20 py-2 rounded-lg text-sm font-bold">-</button>
+                        </div>
+                    </div>
+
+                    <div id="catch-phase-box" class="hidden bg-black/40 p-6 rounded-2xl border border-yellow-400/40 max-w-md mx-auto space-y-4">
+                        <h3 class="text-2xl font-black text-yellow-300 animate-pulse">🎉 モンスターのHPをけずった！</h3>
+                        <p id="catch-rate-info" class="text-sm text-purple-200"><ruby>現在<rt>げんざい</rt></ruby>の<ruby>捕獲確率<rt>ほかくりつ</rt></ruby>: 85%</p>
+                        
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <button onclick="throwBall('normal')" class="bg-white/10 hover:bg-white/20 p-3 rounded-xl border border-white/20 flex flex-col items-center">
+                                <span class="text-2xl mb-1">🔴</span>
+                                <span class="font-bold">モンスターボール</span>
+                                <span class="text-emerald-300 font-bold">むげん (∞)</span>
+                            </button>
+                            <button onclick="throwBall('fancy')" class="bg-pink-500/20 hover:bg-pink-500/30 p-3 rounded-xl border border-pink-400/30 flex flex-col items-center">
+                                <span class="text-2xl mb-1">🎀</span>
+                                <span class="font-bold">ファンシーボール (1.5x)</span>
+                                <span class="text-pink-300"><ruby>所持<rt>しょじ</rt></ruby>: <span id="cnt-fancy">5</span></span>
+                            </button>
+                            <button onclick="throwBall('super')" class="bg-blue-500/20 hover:bg-blue-500/30 p-3 rounded-xl border border-blue-400/30 flex flex-col items-center">
+                                <span class="text-2xl mb-1">🔵</span>
+                                <span class="font-bold">スーパーボール (2.0x)</span>
+                                <span class="text-blue-300"><ruby>所持<rt>しょじ</rt></ruby>: <span id="cnt-super">2</span></span>
+                            </button>
+                            <button onclick="throwBall('hyper')" class="bg-purple-500/20 hover:bg-purple-500/30 p-3 rounded-xl border border-purple-400/30 flex flex-col items-center">
+                                <span class="text-2xl mb-1">🟣</span>
+                                <span class="font-bold">ハイパーボール (3.0x)</span>
+                                <span class="text-purple-300"><ruby>所持<rt>しょじ</rt></ruby>: <span id="cnt-hyper">0</span></span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="throwBall('shiny')" class="bg-gradient-to-r from-pink-500 to-yellow-500 text-black font-black py-3 rounded-xl shadow-lg text-xs">
+                                ✨ シャイニーボール (100%いろちがい!) [<ruby>所持<rt>しょじ</rt></ruby>: <span id="cnt-shiny">0</span>]
+                            </button>
+                            <button onclick="throwBall('master')" class="bg-gradient-to-r from-amber-400 to-yellow-500 text-black font-black py-3 rounded-xl shadow-lg text-xs">
+                                🌟 マスターボール (<ruby>確定<rt>かくてい</rt></ruby>100%!) [<ruby>所持<rt>しょじ</rt></ruby>: <span id="cnt-master">0</span>]
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="retry-phase-box" class="hidden bg-red-950/40 p-6 rounded-2xl border border-red-500/40 max-w-md mx-auto space-y-4">
+                        <h3 class="text-xl font-bold text-red-300">💦 ボールからとびだされてしまった！</h3>
+                        <p class="text-xs text-purple-200">もういちど<ruby>計算<rt>けいさん</rt></ruby>を解いて、<ruby>捕獲率<rt>ほかくりつ</rt></ruby>をブーストしよう！</p>
+                        <div id="retry-problem-text" class="text-2xl font-bold text-cyan-300">3 × 4 = ?</div>
+                        <div class="flex justify-center items-center space-x-2">
+                            <input type="number" id="retry-answer-input" readonly class="w-32 text-center text-2xl font-bold bg-white/10 border border-cyan-400 rounded-lg py-1 text-white">
+                            <button onclick="submitRetryAnswer()" id="btn-submit-retry" class="bg-red-600 hover:bg-red-500 px-5 py-2 rounded-lg font-bold">こたえ</button>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1 max-w-xs mx-auto text-sm">
+                            <button onclick="inputRetryNum(1)" class="bg-white/10 py-1 rounded">1</button>
+                            <button onclick="inputRetryNum(2)" class="bg-white/10 py-1 rounded">2</button>
+                            <button onclick="inputRetryNum(3)" class="bg-white/10 py-1 rounded">3</button>
+                            <button onclick="inputRetryNum(4)" class="bg-white/10 py-1 rounded">4</button>
+                            <button onclick="inputRetryNum(5)" class="bg-white/10 py-1 rounded">5</button>
+                            <button onclick="inputRetryNum(6)" class="bg-white/10 py-1 rounded">6</button>
+                            <button onclick="inputRetryNum(7)" class="bg-white/10 py-1 rounded">7</button>
+                            <button onclick="inputRetryNum(8)" class="bg-white/10 py-1 rounded">8</button>
+                            <button onclick="inputRetryNum(9)" class="bg-white/10 py-1 rounded">9</button>
+                            <button onclick="inputRetryNum('clear')" class="bg-red-500/20 py-1 rounded text-xs">けす</button>
+                            <button onclick="inputRetryNum(0)" class="bg-white/10 py-1 rounded">0</button>
+                            <button onclick="inputRetryNum('minus')" class="bg-white/10 py-1 rounded">-</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🐉 ボスバトル画面 -->
+            <div id="screen-boss" class="hidden space-y-4">
+                <div class="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-red-500/30 shadow-2xl">
+                    <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                        <button onclick="switchScreen('home')" class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg text-sm">◀ ホームへ</button>
+                        <h2 class="text-xl font-black text-yellow-300 flex items-center space-x-2">
+                            <span>🐉</span> <span>エンドコンテンツ: <ruby>学年別<rt>がくねんべつ</rt></ruby>ボスバトル</span>
+                        </h2>
+                        <span></span>
+                    </div>
+
+                    <div id="boss-setup-view" class="space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div onclick="selectBossGrade(1)" id="card-boss-1" class="bg-white/5 hover:bg-white/15 p-4 rounded-2xl border-2 border-emerald-400 cursor-pointer transition">
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-4xl">🍬</span>
+                                    <div>
+                                        <span class="text-[10px] bg-emerald-500 text-black px-2 py-0.5 rounded font-black">1年生ボス</span>
+                                        <h4 class="font-bold text-base text-yellow-300">おかしの巨竜 キャンディドラゴ</h4>
+                                        <p class="text-xs text-purple-200">出題: 10のほすう・たし算・ひき算</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div onclick="selectBossGrade(2)" id="card-boss-2" class="bg-white/5 hover:bg-white/15 p-4 rounded-2xl border-2 border-transparent cursor-pointer transition">
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-4xl">🧜‍♀️</span>
+                                    <div>
+                                        <span class="text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded font-black">2年生ボス</span>
+                                        <h4 class="font-bold text-base text-yellow-300">深海の歌姫 セイレーンクィーン</h4>
+                                        <p class="text-xs text-purple-200">出題: 九九・穴埋め・2桁の計算</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div onclick="selectBossGrade(3)" id="card-boss-3" class="bg-white/5 hover:bg-white/15 p-4 rounded-2xl border-2 border-transparent cursor-pointer transition">
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-4xl">🌋</span>
+                                    <div>
+                                        <span class="text-[10px] bg-orange-500 text-black px-2 py-0.5 rounded font-black">3年生ボス</span>
+                                        <h4 class="font-bold text-base text-yellow-300">火炎の邪神 ヴォルカノス</h4>
+                                        <p class="text-xs text-purple-200">出題: 九九・あまりのある割り算</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div onclick="selectBossGrade(4)" id="card-boss-4" class="bg-white/5 hover:bg-white/15 p-4 rounded-2xl border-2 border-transparent cursor-pointer transition">
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-4xl">👑</span>
+                                    <div>
+                                        <span class="text-[10px] bg-purple-500 text-white px-2 py-0.5 rounded font-black">高学年ボス</span>
+                                        <h4 class="font-bold text-base text-yellow-300">終焉の神王 アルマゲドン</h4>
+                                        <p class="text-xs text-purple-200">出題: 四則けいさん・複合問題</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-black/30 p-4 rounded-2xl border border-white/10">
+                            <h4 class="font-extrabold text-sm text-yellow-300 mb-2">難易度（イージー〜ハード）をえらぼう！</h4>
+                            <div class="grid grid-cols-3 gap-3">
+                                <button onclick="selectBossDiff('easy')" id="btn-diff-easy" class="p-3 rounded-xl border-2 border-green-400 bg-green-950/40 text-left transition">
+                                    <div class="font-black text-green-300 text-sm">🟢 イージー</div>
+                                    <div class="text-[10px] text-purple-200 mt-1">報酬: コイン100G / ダイヤ2個</div>
+                                </button>
+                                <button onclick="selectBossDiff('normal')" id="btn-diff-normal" class="p-3 rounded-xl border-2 border-transparent bg-white/5 text-left transition">
+                                    <div class="font-black text-yellow-300 text-sm">🟡 ノーマル</div>
+                                    <div class="text-[10px] text-purple-200 mt-1">報酬: コイン300G / ダイヤ5個</div>
+                                </button>
+                                <button onclick="selectBossDiff('hard')" id="btn-diff-hard" class="p-3 rounded-xl border-2 border-transparent bg-white/5 text-left transition">
+                                    <div class="font-black text-red-400 text-sm">🔴 ハード</div>
+                                    <div class="text-[10px] text-purple-200 mt-1">報酬: コイン1000G / ダイヤ15個 + 👑ボス限定テーマ確定解放！</div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-black/30 p-4 rounded-2xl border border-amber-400/30 space-y-1 text-xs">
+                            <h4 class="font-bold text-yellow-300">🏆 ボス討伐報酬 ＆ ドロップ一覧</h4>
+                            <p class="text-purple-200">
+                                ・<span class="text-green-300 font-bold">イージー</span>: コイン100G、ダイヤ2個 (虹のかけら確率10%)<br>
+                                ・<span class="text-yellow-300 font-bold">ノーマル</span>: コイン300G、ダイヤ5個 (虹のかけら確率35%)<br>
+                                ・<span class="text-red-400 font-bold">ハードクリア</span>: コイン1000G、ダイヤ15個、虹のかけら(100%) ＋ <span class="text-yellow-300 font-bold font-black">【ボスの限定テーマ】完全解放！</span>
+                            </p>
+                        </div>
+
+                        <div class="bg-black/30 p-4 rounded-2xl border border-white/10">
+                            <h4 class="font-extrabold text-sm text-yellow-300 mb-2">出撃させる相棒モンスターをえらぼう！</h4>
+                            <div id="boss-partner-selector" class="flex space-x-3 overflow-x-auto pb-2"></div>
+                        </div>
+
+                        <button onclick="startBossBattle()" class="w-full bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 text-white font-black text-xl py-4 rounded-2xl shadow-xl hover:scale-102 transition">
+                            ⚔️ この設定でボス戦を開始する！！
+                        </button>
+                    </div>
+
+                    <div id="boss-battle-view" class="hidden space-y-4 text-center">
+                        <div class="flex justify-between items-center text-xs">
+                            <button onclick="abandonBossBattle()" class="bg-red-600/40 hover:bg-red-600/70 border border-red-400 text-red-200 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1">
+                                <span>🏳️</span>
+                                <span>あきらめる</span>
+                            </button>
+                            <span id="boss-grade-badge" class="bg-red-600 text-white font-bold px-3 py-1 rounded-full">1年生ボス</span>
+                            <span id="boss-diff-badge" class="bg-green-500 text-black font-extrabold px-3 py-1 rounded-full">🟢 イージー</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 items-center bg-black/40 p-4 rounded-2xl border border-white/10 my-2">
+                            <div class="flex flex-col items-center">
+                                <span class="text-[10px] text-purple-300 font-bold">【あなたの相棒】</span>
+                                <div id="partner-display-svg" class="w-24 h-24 my-1 flex items-center justify-center relative"></div>
+                                <h4 id="partner-display-name" class="text-xs font-bold text-yellow-300">相棒名</h4>
+                                <div class="w-full bg-black/50 rounded-full h-3 mt-1 overflow-hidden border border-white/20">
+                                    <div id="partner-hp-bar" class="bg-green-400 h-full transition-all" style="width: 100%;"></div>
+                                </div>
+                                <span id="partner-hp-text" class="text-[10px] font-bold mt-0.5">HP: 500/500</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <span class="text-[10px] text-red-300 font-bold">【ボス】</span>
+                                <div id="boss-display-svg" class="w-28 h-28 my-1 flex items-center justify-center filter drop-shadow-[0_0_15px_rgba(255,0,0,0.7)]"></div>
+                                <h4 id="boss-display-name" class="text-xs font-bold text-red-300">ボス名</h4>
+                                <div class="w-full bg-black/50 rounded-full h-3 mt-1 overflow-hidden border border-white/20">
+                                    <div id="boss-hp-bar" class="bg-red-500 h-full transition-all" style="width: 100%;"></div>
+                                </div>
+                                <span id="boss-hp-text" class="text-[10px] font-bold mt-0.5">HP: 400/400</span>
+                            </div>
+                        </div>
+
+                        <div id="boss-math-box" class="bg-black/40 p-5 rounded-2xl border border-red-500/40 max-w-md mx-auto">
+                            <div id="boss-phase-title" class="text-xs font-bold text-yellow-300 mb-1">⚔️ 攻撃フェーズ！算数を解いて攻撃しよう！</div>
+                            <div id="boss-problem-text" class="text-3xl font-black mb-1 tracking-wider text-cyan-300">4 + ? = 10</div>
+                            <div class="text-xs font-bold text-yellow-300 mb-3 space-x-1">
+                                <span>⚡ 早解きボーナス判定: <span id="boss-crit-timer" class="text-pink-300 font-black">6.0</span> 秒以内</span>
+                            </div>
+
+                            <div class="flex justify-center items-center space-x-2 mb-4">
+                                <input type="number" id="boss-ans-input" readonly class="w-36 text-center text-3xl font-bold bg-white/10 border-2 border-cyan-400/60 rounded-xl py-2 text-white focus:outline-none" placeholder="?">
+                                <button id="btn-boss-submit" onclick="submitBossAnswer()" class="bg-gradient-to-r from-red-500 to-amber-600 hover:opacity-90 px-6 py-3 rounded-xl font-black text-lg shadow-lg">こうげき</button>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 max-w-xs mx-auto">
+                                <button onclick="inputBossNum(1)" class="bg-white/10 py-2 rounded-lg text-xl font-bold">1</button>
+                                <button onclick="inputBossNum(2)" class="bg-white/10 py-2 rounded-lg text-xl font-bold">2</button>
+                                <button onclick="inputBossNum(3)" class="bg-white/10 py-2 rounded-lg text-xl font-bold">3</button>
+                                <button onclick="inputBossNum(4)" class="bg-white/10 py-2 rounded-lg text-xl font-bold">4</button>
+                                <button onclick="inputBossNum(5)" class="bg-white/10 py-2 rounded-lg text-xl font-bold">5</button>
+                                <button onclick="inputBossNum(6)" class="bg-white/10 py-2 rounded-lg text-xl font-bold">6</button>
+                                <button onclick="inputBossNum(7)" class="bg-white/10 py-2 rounded-lg text-xl font-bold">7</button>
+                                <button onclick="inputBossNum(8)" class="bg-white/10 py-2 rounded-lg text-xl font-bold">8</button>
+                                <button onclick="inputBossNum(9)" class="bg-white/10 py-2 rounded-lg text-xl font-bold">9</button>
+                                <button onclick="inputBossNum('clear')" class="bg-red-500/20 py-2 rounded-lg text-sm font-bold text-red-300">けす</button>
+                                <button onclick="inputBossNum(0)" class="bg-white/10 py-2 rounded-lg text-xl font-bold">0</button>
+                                <button onclick="inputBossNum('minus')" class="bg-white/10 py-2 rounded-lg text-sm font-bold">-</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 👑 称号・スキンルーム -->
+            <div id="screen-titles" class="hidden space-y-4">
+                <div class="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-amber-400/40 shadow-2xl max-w-2xl mx-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <button onclick="switchScreen('home')" class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg text-sm">◀ ホームへ</button>
+                        <h2 class="text-xl font-black text-yellow-300">👑 称号 ＆ スキンルーム</h2>
+                        <span></span>
+                    </div>
+                    <div class="space-y-4 text-xs">
+                        <div class="bg-black/30 p-4 rounded-2xl border border-white/10 space-y-2">
+                            <h4 class="font-bold text-yellow-300">🏆 獲得済み限定称号</h4>
+                            <div id="unlocked-titles-list" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 図鑑画面 -->
+            <div id="screen-pokedex" class="hidden space-y-4">
+                <div class="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl">
+                    <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+                        <button onclick="switchScreen('home')" class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg text-sm">◀ ホームへ</button>
+                        
+                        <div class="flex items-center space-x-2">
+                            <h2 class="text-xl font-bold text-yellow-300">モンスター<ruby>図鑑<rt>ずかん</rt></ruby></h2>
+                            <span id="all-clear-badge" class="hidden bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 text-black px-3 py-1 rounded-full text-xs font-black shadow-lg animate-bounce">
+                                🏆 全制覇 👑
+                            </span>
+                        </div>
+                        <span></span>
+                    </div>
+
+                    <div class="flex flex-wrap space-x-2 mb-3 border-b border-white/20 pb-2 gap-2">
+                        <button onclick="setDexTab('normal')" id="tab-dex-normal" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white">
+                            📖 ノーマル (<span id="count-dex-normal">0</span>/150)
+                        </button>
+                        <button onclick="setDexTab('shiny')" id="tab-dex-shiny" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/25">
+                            ✨ シャイニー (<span id="count-dex-shiny">0</span>/150)
+                        </button>
+                        <button onclick="setDexTab('s1_normal')" id="tab-dex-s1-normal" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/25">
+                            🌟 S1限定 (<span id="count-dex-s1-normal">0</span>/10)
+                        </button>
+                        <button onclick="setDexTab('s1_shiny')" id="tab-dex-s1-shiny" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/25">
+                            ✨ S1シャイニー (<span id="count-dex-s1-shiny">0</span>/10)
+                        </button>
+                    </div>
+
+                    <div id="pokedex-grid" class="grid grid-cols-3 sm:grid-cols-6 gap-3 max-h-[55vh] overflow-y-auto pr-2"></div>
+                </div>
+            </div>
+
+            <!-- ショップ画面 -->
+            <div id="screen-shop" class="hidden space-y-4">
+                <div class="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <button onclick="switchScreen('home')" class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg text-sm">◀ ホームへ</button>
+                        <h2 class="text-xl font-bold text-yellow-300">ショップ ＆ 💎ダイヤこうかんじょ</h2>
+                        <span></span>
+                    </div>
+
+                    <div class="flex space-x-2 mb-4 border-b border-white/20 pb-2">
+                        <button onclick="setShopTab('coins')" id="tab-btn-coins" class="px-4 py-1.5 rounded-xl text-xs font-bold bg-yellow-500 text-black">🪙 コインショップ</button>
+                        <button onclick="setShopTab('gems')" id="tab-btn-gems" class="px-4 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20">💎 ダイヤこうかんじょ</button>
+                    </div>
+
+                    <div id="shop-coins-view" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[55vh] overflow-y-auto pr-2">
+                        <div class="bg-white/5 p-4 rounded-2xl border border-white/10 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-pink-300">🎀 ファンシーボール (1.5x)</h4>
+                                <span class="text-xs text-yellow-300"><ruby>価格<rt>かかく</rt></ruby>: 50コイン</span>
+                            </div>
+                            <button onclick="buyItem('fancy', 50)" class="bg-pink-600 hover:bg-pink-500 px-4 py-2 rounded-xl font-bold text-sm">かう</button>
+                        </div>
+                        <div class="bg-white/5 p-4 rounded-2xl border border-white/10 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-blue-300">🔵 スーパーボール (2.0x)</h4>
+                                <span class="text-xs text-yellow-300"><ruby>価格<rt>かかく</rt></ruby>: 100コイン</span>
+                            </div>
+                            <button onclick="buyItem('super', 100)" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl font-bold text-sm">かう</button>
+                        </div>
+                        <div class="bg-white/5 p-4 rounded-2xl border border-white/10 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-purple-300">🟣 ハイパーボール (3.0x)</h4>
+                                <span class="text-xs text-yellow-300"><ruby>価格<rt>かかく</rt></ruby>: 250コイン</span>
+                            </div>
+                            <button onclick="buyItem('hyper', 250)" class="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded-xl font-bold text-sm">かう</button>
+                        </div>
+                        <div class="bg-white/5 p-4 rounded-2xl border border-yellow-400/40 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-pink-300">✨ シャイニーボール (100%いろちがい)</h4>
+                                <span class="text-xs text-yellow-300"><ruby>価格<rt>かかく</rt></ruby>: 3000コイン</span>
+                            </div>
+                            <button onclick="buyItem('shiny', 3000)" class="bg-gradient-to-r from-pink-500 to-yellow-500 text-black hover:opacity-90 px-4 py-2 rounded-xl font-bold text-sm">かう</button>
+                        </div>
+                        <div class="bg-white/5 p-4 rounded-2xl border border-white/10 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-yellow-300">🌟 マスターボール (100%<ruby>確定<rt>かくてい</rt></ruby>)</h4>
+                                <span class="text-xs text-yellow-300"><ruby>価格<rt>かかく</rt></ruby>: 1000コイン</span>
+                            </div>
+                            <button onclick="buyItem('master', 1000)" class="bg-yellow-500 text-black hover:bg-yellow-400 px-4 py-2 rounded-xl font-bold text-sm">かう</button>
+                        </div>
+                    </div>
+
+                    <div id="shop-gems-view" class="hidden space-y-4 max-h-[55vh] overflow-y-auto pr-2">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-white/5 p-4 rounded-2xl border border-pink-400/30 flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-bold text-yellow-300">🦄 <ruby>神話<rt>しんわ</rt></ruby>のたまご (No.121〜150)</h4>
+                                    <p class="text-[10px] text-purple-200">ダイヤ<ruby>限定<rt>げんてい</rt></ruby>★5<ruby>神話<rt>しんわ</rt></ruby>モンスターを<ruby>召喚<rt>しょうかん</rt></ruby>！</p>
+                                    <span class="text-xs text-pink-300 font-bold"><ruby>価格<rt>かかく</rt></ruby>: 💎15個</span>
+                                </div>
+                                <button onclick="exchangeGem('myth_egg', 15)" class="bg-pink-600 hover:bg-pink-500 px-4 py-2 rounded-xl font-bold text-sm"><ruby>召喚<rt>しょうかん</rt></ruby>する</button>
+                            </div>
+                            <div id="god-stone-shop-box" class="bg-white/5 p-4 rounded-2xl border border-amber-400/30 flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-bold text-amber-300">👑 <ruby>神々<rt>かみがみ</rt></ruby>の<ruby>秘石<rt>ひせき</rt></ruby> (★5<ruby>神聖<rt>しんせい</rt></ruby><ruby>召喚<rt>しょうかん</rt></ruby>)</h4>
+                                    <p id="god-stone-desc" class="text-[10px] text-purple-200"><ruby>最高<rt>さいこう</rt></ruby>レア★5<ruby>神話<rt>しんわ</rt></ruby><ruby>生物<rt>せいぶつ</rt></ruby>＆【シャイニー<ruby>確定<rt>かくてい</rt></ruby>】！</p>
+                                    <span class="text-xs text-pink-300 font-bold"><ruby>価格<rt>かかく</rt></ruby>: 💎30個</span>
+                                </div>
+                                <button id="btn-god-stone" onclick="exchangeGem('god_stone', 30)" class="bg-amber-500 text-black hover:bg-amber-400 px-4 py-2 rounded-xl font-bold text-sm"><ruby>召喚<rt>しょうかん</rt></ruby>する</button>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-white/20 pt-3 space-y-3">
+                            <h3 class="font-bold text-sm text-yellow-300 flex items-center space-x-1">
+                                <span>🎨</span> <span>背景テーマ・ルームカスタム (全6種 ＋ ボス限定)</span>
+                            </h3>
+
+                            <div class="bg-white/5 p-3 rounded-2xl border border-white/10 flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-bold text-white text-xs">🌌 デフォルトテーマ (初期背景)</h4>
+                                    <p class="text-[10px] text-purple-200">いつでも無料で初期のテーマに戻せます。</p>
+                                </div>
+                                <button onclick="applyTheme('default')" class="bg-white/20 hover:bg-white/30 text-white font-bold px-3 py-1.5 rounded-xl text-xs">適用する</button>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="bg-white/5 p-3 rounded-2xl border border-pink-400/30 flex justify-between items-center">
+                                    <div>
+                                        <h4 class="font-bold text-pink-300 text-xs">🌸 ゆめかわ</h4>
+                                        <span class="text-[10px] text-pink-200">価格: 💎20個</span>
+                                    </div>
+                                    <button onclick="buyThemeWithGem('yumekawa', 20)" class="bg-pink-600 hover:bg-pink-500 font-bold px-3 py-1.5 rounded-xl text-xs">こうかん</button>
+                                </div>
+                                <div class="bg-white/5 p-3 rounded-2xl border border-blue-400/30 flex justify-between items-center">
+                                    <div>
+                                        <h4 class="font-bold text-blue-300 text-xs">🌊 オーシャン</h4>
+                                        <span class="text-[10px] text-blue-200">価格: 💎20個</span>
+                                    </div>
+                                    <button onclick="buyThemeWithGem('ocean', 20)" class="bg-blue-600 hover:bg-blue-500 font-bold px-3 py-1.5 rounded-xl text-xs">こうかん</button>
+                                </div>
+                                <div class="bg-white/5 p-3 rounded-2xl border border-orange-400/30 flex justify-between items-center">
+                                    <div>
+                                        <h4 class="font-bold text-orange-300 text-xs">🌋 ボルドー・火山</h4>
+                                        <span class="text-[10px] text-orange-200">価格: 💎20個</span>
+                                    </div>
+                                    <button onclick="buyThemeWithGem('volcano', 20)" class="bg-orange-600 hover:bg-orange-500 font-bold px-3 py-1.5 rounded-xl text-xs">こうかん</button>
+                                </div>
+                                <div class="bg-white/5 p-3 rounded-2xl border border-purple-400/30 flex justify-between items-center">
+                                    <div>
+                                        <h4 class="font-bold text-purple-300 text-xs">🌌 ギャラクシー・銀河</h4>
+                                        <span class="text-[10px] text-purple-200">価格: 💎20個</span>
+                                    </div>
+                                    <button onclick="buyThemeWithGem('galaxy', 20)" class="bg-purple-600 hover:bg-purple-500 font-bold px-3 py-1.5 rounded-xl text-xs">こうかん</button>
+                                </div>
+
+                                <div class="bg-white/5 p-3 rounded-2xl border border-yellow-400/50 flex justify-between items-center sm:col-span-2">
+                                    <div>
+                                        <h4 class="font-bold text-yellow-300 text-xs">🌈 レインボー (豪華虹色アニメーション)</h4>
+                                        <p class="text-[10px] text-purple-200">背景の色が滑らかに移り変わる特別アニメーションテーマ！</p>
+                                        <span class="text-[10px] text-yellow-200 font-bold">価格: 💎30個</span>
+                                    </div>
+                                    <button onclick="buyThemeWithGem('rainbow', 30)" class="bg-gradient-to-r from-yellow-500 to-amber-500 text-black font-extrabold px-4 py-2 rounded-xl text-xs">こうかん</button>
+                                </div>
+
+                                <div class="bg-white/5 p-3 rounded-2xl border border-amber-300 flex justify-between items-center sm:col-span-2">
+                                    <div>
+                                        <h4 class="font-bold text-amber-300 text-xs">✨ 👑 アルティメットゴッド (究極輝くテーマ)</h4>
+                                        <p class="text-[10px] text-amber-100">神々の輝きをまとう超派手・神聖究極テーマ！</p>
+                                        <span class="text-[10px] text-amber-200 font-bold">価格: 💎999個</span>
+                                    </div>
+                                    <button onclick="buyThemeWithGem('god', 999)" class="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-black font-black px-4 py-2 rounded-xl text-xs">こうかん</button>
+                                </div>
+                            </div>
+
+                            <div class="bg-black/30 p-3 rounded-2xl border border-red-500/30 space-y-2 text-xs">
+                                <h4 class="font-bold text-red-300">🐉 ボス戦ハード限定解放テーマ</h4>
+                                <div id="boss-theme-list" class="grid grid-cols-2 gap-2 text-[10px]"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- スキル画面 -->
+            <div id="screen-skills" class="hidden space-y-4">
+                <div class="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <button onclick="switchScreen('home')" class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg text-sm">◀ ホームへ</button>
+                        <h2 class="text-xl font-bold text-yellow-300">のうりょく<ruby>育成<rt>いくせい</rt></ruby> (SP: <span id="sp-val">0</span>)</h2>
+                        <span></span>
+                    </div>
+                    <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                        <div class="bg-white/5 p-4 rounded-2xl border border-white/10 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-yellow-300">🪙 ゲットコイン UP (LV.<span id="skill-coin-lvl">0</span>)</h4>
+                                <p class="text-xs text-purple-200">バトル<ruby>勝利時<rt>しょうりじ</rt></ruby>の<ruby>獲得<rt>かくとく</rt></ruby>コインが<ruby>増加<rt>ぞうか</rt></ruby>します。</p>
+                            </div>
+                            <button onclick="upgradeSkill('coin')" class="bg-yellow-600 hover:bg-yellow-500 px-4 py-2 rounded-xl font-bold text-sm">きたえる (1SP)</button>
+                        </div>
+                        <div class="bg-white/5 p-4 rounded-2xl border border-white/10 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-cyan-300">📦 アイテムドロップ<ruby>率<rt>りつ</rt></ruby> UP (LV.<span id="skill-drop-lvl">0</span>)</h4>
+                                <p class="text-xs text-purple-200"><ruby>戦闘勝利<rt>せんとうしょうり</rt></ruby>・<ruby>捕獲時<rt>ほかくじ</rt></ruby>にボールやアイテムが落ちやすくなります。</p>
+                            </div>
+                            <button onclick="upgradeSkill('drop')" class="bg-cyan-600 hover:bg-cyan-500 px-4 py-2 rounded-xl font-bold text-sm">きたえる (1SP)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 宝物画面 -->
+            <div id="screen-treasures" class="hidden space-y-4">
+                <div class="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <button onclick="switchScreen('home')" class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg text-sm">◀ ホームへ</button>
+                        <h2 class="text-xl font-bold text-yellow-300">ほうもつコレクション (<ruby>全<rt>ぜん</rt></ruby>10<ruby>種<rt>しゅ</rt></ruby>)</h2>
+                        <span></span>
+                    </div>
+                    <div id="treasures-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-3 max-h-[60vh] overflow-y-auto pr-2"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- モンスター詳細モーダル -->
+    <div id="modal-dex" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-gradient-to-br from-indigo-950 to-purple-950 border border-white/30 p-6 rounded-3xl max-w-md w-full text-center relative shadow-2xl">
+            <button onclick="closeModal()" class="absolute top-4 right-4 bg-white/20 hover:bg-white/30 w-8 h-8 rounded-full font-bold">✕</button>
+            <div id="modal-svg-box" class="w-40 h-40 mx-auto mb-3 flex items-center justify-center relative"></div>
+            <h3 id="modal-name" class="text-2xl font-black text-yellow-300">モンスター名</h3>
+            
+            <div class="flex justify-center items-center space-x-2 my-1 text-xs">
+                <span id="modal-type-badge" class="px-3 py-0.5 rounded-full font-black text-white shadow">タイプ</span>
+                <span id="modal-rarity-badge" class="text-purple-300">レア度: ★1</span>
+            </div>
+
+            <p id="modal-desc" class="text-sm text-purple-100 my-3 bg-white/5 p-3 rounded-xl border border-white/10"></p>
+            
+            <div id="modal-stats-box" class="grid grid-cols-3 gap-2 bg-black/40 border border-yellow-400/30 p-2.5 rounded-xl mb-3 text-xs font-bold">
+                <div class="bg-white/5 p-1.5 rounded-lg border border-white/10">
+                    <span class="text-emerald-300 block">💚 HP</span>
+                    <span id="modal-stat-hp" class="text-sm text-white">100</span>
+                </div>
+                <div class="bg-white/5 p-1.5 rounded-lg border border-white/10">
+                    <span class="text-red-300 block">⚔️ ATK</span>
+                    <span id="modal-stat-atk" class="text-sm text-white">2</span>
+                </div>
+                <div class="bg-white/5 p-1.5 rounded-lg border border-white/10">
+                    <span class="text-blue-300 block">🛡️ DEF</span>
+                    <span id="modal-stat-def" class="text-sm text-white">2</span>
+                </div>
+            </div>
+
+            <div class="flex justify-around text-xs font-bold text-purple-200 mb-3 bg-black/30 p-2 rounded-xl">
+                <span>つかまえた<ruby>回数<rt>かいすう</rt></ruby>: <span id="modal-caught-count" class="text-yellow-300">0</span></span>
+                <span>強化: LV.<span id="modal-power-lvl" class="text-cyan-300">0</span>/10</span>
+            </div>
+
+            <div class="space-y-2">
+                <button id="btn-powerup-monster" onclick="powerUpCurrentMonster()" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:opacity-90 text-white font-black py-2 rounded-xl shadow-lg text-xs">
+                    🌈 虹のかけらで強化する (3個消費 / HP・ATK・DEF +15%)
+                </button>
+                <button id="btn-equip-skin" onclick="toggleMonsterSkin()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:opacity-90 text-black font-black py-2 rounded-xl shadow-lg text-xs">
+                    👑 この姿をキャラカードスキンに装着する
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            level: 1,
+            exp: 0,
+            expNext: 50,
+            coins: 100,
+            gems: 5,
+            rainbowPieces: 0,
+            sp: 0,
+            skills: { coin: 0, drop: 0 },
+            balls: { normal: 999, fancy: 5, super: 2, hyper: 0, shiny: 0, master: 0 },
+            caught: {},
+            treasures: {},
+            selectedArea: 1,
+            activeEncounter: null,
+            ownedThemes: ['default'],
+            currentTheme: 'default',
+            celebrated: { normal150: false, shiny150: false, all300: false },
+            unlockedBossThemes: [],
+            unlockedTitles: [],
+            equippedSkinId: null,
+            equippedSkinShiny: false
+        };
+
+        let problemHistory = [];
+        let bossProblemHistory = [];
+
+        const saved = localStorage.getItem('math_monsters_save_v17');
+        if (saved) {
+            try { 
+                let parsed = JSON.parse(saved);
+                gameState = { ...gameState, ...parsed };
+                if(!gameState.celebrated) gameState.celebrated = { normal150: false, shiny150: false, all300: false };
+                if(gameState.rainbowPieces === undefined) gameState.rainbowPieces = 0;
+                if(!gameState.unlockedBossThemes) gameState.unlockedBossThemes = [];
+                if(!gameState.unlockedTitles) gameState.unlockedTitles = [];
+                if(!gameState.ownedThemes) gameState.ownedThemes = ['default'];
+            } catch(e){}
+        }
+
+        function saveGame() {
+            localStorage.setItem('math_monsters_save_v17', JSON.stringify(gameState));
+        }
+
+        function applyTheme(themeName) {
+            const body = document.getElementById('body-theme');
+            body.className = `theme-${themeName} min-h-screen text-white select-none relative`;
+            gameState.currentTheme = themeName;
+            saveGame();
+            showToast('🎨', 'テーマ切替', `「${themeName}」テーマを適用しました！`);
+        }
+
+        function buyThemeWithGem(themeName, cost) {
+            if (gameState.ownedThemes.includes(themeName)) { applyTheme(themeName); return; }
+            if (gameState.gems < cost) { showToast('⚠️', 'ダイヤが足りない！'); return; }
+            gameState.gems -= cost;
+            gameState.ownedThemes.push(themeName);
+            applyTheme(themeName);
+            saveGame(); updateHeader();
+            showToast('👑', 'テーマ解放！', '新しいテーマを購入して適用しました！');
+        }
+
+        function renderBossThemeList() {
+            let container = document.getElementById('boss-theme-list');
+            if (!container) return;
+            container.innerHTML = '';
+            const bossThemesData = [
+                { id: 'boss1', name: '🍬 おかしテーマ (1年)', grade: 1 },
+                { id: 'boss2', name: '🧜‍♀️ セイレーンテーマ (2年)', grade: 2 },
+                { id: 'boss3', name: '🌋 火炎神テーマ (3年)', grade: 3 },
+                { id: 'boss4', name: '👑 魔王テーマ (高学年)', grade: 4 }
+            ];
+
+            bossThemesData.forEach(bt => {
+                let isUnlocked = gameState.unlockedBossThemes.includes(bt.id);
+                let div = document.createElement('div');
+                div.className = `p-2 rounded-xl border flex justify-between items-center ${isUnlocked ? 'bg-white/10 border-red-400/50' : 'bg-black/40 border-white/10 opacity-50'}`;
+                div.innerHTML = `
+                    <span>${bt.name}</span>
+                    ${isUnlocked ? `<button onclick="applyTheme('${bt.id}')" class="bg-red-600 hover:bg-red-500 text-white font-bold px-2 py-1 rounded text-[9px]">適用</button>` : '<span class="text-gray-400">ハード未クリア</span>'}
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function getNormalCaughtCount() {
+            let count = 0;
+            for (let i = 1; i <= 150; i++) {
+                if (gameState.caught[i] && gameState.caught[i].count > 0) count++;
+            }
+            return count;
+        }
+
+        function getShinyCaughtCount() {
+            let count = 0;
+            for (let i = 1; i <= 150; i++) {
+                if (gameState.caught[i] && gameState.caught[i].shiny) count++;
+            }
+            return count;
+        }
+
+        function isFirst100Completed() {
+            for (let i = 1; i <= 100; i++) {
+                if (!gameState.caught[i] || gameState.caught[i].count <= 0) return false;
+            }
+            return true;
+        }
+
+        function calculateMonsterStats(rarity, isShiny, powerLevel = 0) {
+            let baseHp = rarity * 100;
+            let baseAtk = rarity * 2;
+            let baseDef = rarity * 2;
+            let mult = 1.0;
+            if (isShiny) mult *= 1.5;
+            if (powerLevel > 0) mult *= (1 + (powerLevel * 0.15));
+            return {
+                hp: Math.round(baseHp * mult),
+                atk: parseFloat((baseAtk * mult).toFixed(1)),
+                def: parseFloat((baseDef * mult).toFixed(1))
+            };
+        }
+
+        function getTypeBadgeHTML(type) {
+            const styles = {
+                'ほのお': 'bg-red-600 border-red-400 text-white',
+                'みず': 'bg-blue-600 border-blue-400 text-white',
+                'くさ': 'bg-emerald-600 border-emerald-400 text-white',
+                'でんき': 'bg-yellow-500 border-yellow-300 text-black',
+                'ひかり': 'bg-amber-400 border-amber-200 text-black',
+                'やみ': 'bg-purple-900 border-purple-500 text-purple-200'
+            };
+            const icons = {
+                'ほのお': '🔥', 'みず': '🌊', 'くさ': '🌿',
+                'でんき': '⚡', 'ひかり': '✨', 'やみ': '😈'
+            };
+            let cls = styles[type] || 'bg-gray-600 text-white';
+            let ico = icons[type] || '❓';
+            return `<span class="${cls} border px-2 py-0.5 rounded-full font-black inline-flex items-center space-x-1"><span>${ico}</span><span>${type}</span></span>`;
+        }
+
+        function getTypeMultiplier(attackerType, defenderType) {
+            if (!attackerType || !defenderType) return 1.0;
+            if (attackerType === 'ほのお' && defenderType === 'くさ') return 1.5;
+            if (attackerType === 'くさ' && defenderType === 'みず') return 1.5;
+            if (attackerType === 'みず' && defenderType === 'ほのお') return 1.5;
+            if (attackerType === 'でんき' && defenderType === 'みず') return 1.5;
+            if (attackerType === 'ひかり' && defenderType === 'やみ') return 1.5;
+            if (attackerType === 'やみ' && defenderType === 'ひかり') return 1.5;
+
+            if (attackerType === 'くさ' && defenderType === 'ほのお') return 0.75;
+            if (attackerType === 'みず' && defenderType === 'くさ') return 0.75;
+            if (attackerType === 'ほのお' && defenderType === 'みず') return 0.75;
+            if (attackerType === 'みず' && defenderType === 'でんき') return 0.75;
+
+            return 1.0;
+        }
+
+        const treasuresData = [
+            { id: 1, name: "キラキラリボン", icon: "🎀", desc: "おめかし用のきれいなリボン" },
+            { id: 2, name: "黄金の剣", icon: "🗡️", desc: "勇者の伝説が宿る小さな剣" },
+            { id: 3, name: "星降るステッキ", icon: "🪄", desc: "振ると星の粉が舞う魔法の杖" },
+            { id: 4, name: "虹の羽ペン", icon: "🪶", desc: "七色に輝く美しい羽のペン" },
+            { id: 5, name: "キャンディ王冠", icon: "👑", desc: "甘いお菓子でできた王様の冠" },
+            { id: 6, name: "ドラゴンのお守り", icon: "🛡️", desc: "魔物を退ける硬いウロコ" },
+            { id: 7, name: "月夜のペンダント", icon: "🌙", desc: "夜空の光を閉じ込めた宝石" },
+            { id: 8, name: "おもちゃの飛行船", icon: "🛸", desc: "大空をすいすい飛べる模型" },
+            { id: 9, name: "クリスタルガラス", icon: "💎", desc: "神秘的な光を放つ透明な石" },
+            { id: 10, name: "伝説の算数ノート", icon: "📖", desc: "すべての答えが記された神聖なノート" }
+        ];
+
+        const types = ['ほのお', 'みず', 'くさ', 'でんき', 'ひかり', 'やみ'];
+        const namesPart1 = ['ピコ', 'ニャン', 'ポコ', 'ウサ', 'モフ', 'ルナ', 'ソラ', 'キラ', 'メル', 'ココ', 'ガオ', 'ドグ', 'ファル', 'ゼノ', 'レック', 'プニ', 'チコ', 'ロロ', 'ミュウ', 'エル'];
+        const namesPart2 = ['リス', 'ベア', 'たん', 'っち', 'ぷに', 'ドラゴン', 'ナイト', 'フェニックス', 'スライム', 'ゴーレム', 'キャット', 'バード', 'ウルフ', 'キッド', 'プリン'];
+        
+        const secretDetails = [
+            { id: 101, name: "アストロ・プニ", desc: "星屑をまとったピュアなスライム系シークレットモンスター。" },
+            { id: 102, name: "スター・ニャン", desc: "夜空の星くずをしっぽに宿したネコ型シークレットモンスター。" },
+            { id: 103, name: "コスモ・ベア", desc: "星のオーラを包み込んだクマ型戦士のシークレットモンスター。" },
+            { id: 104, name: "ルミナス・キッド", desc: "光の粒子を放つ少年の姿をした精霊系シークレットモンスター。" },
+            { id: 105, name: "ギャラクシア", desc: "銀河の渦を体に宿した美しき幻獣のシークレットモンスター。" },
+            { id: 106, name: "ステラ・メロディ", desc: "星の瞬きで美しい音色を奏でるアイドル獣シークレットモンスター。" },
+            { id: 107, name: "メテオ・ドラグ", desc: "隕石のエネルギーを纏う小龍のシークレットモンスター。" },
+            { id: 108, name: "ノヴァ・ナイト", desc: "超新星爆発の輝きを持つ黄金の騎士シークレットモンスター。" },
+            { id: 109, name: "ソラリス・フェニ", desc: "太陽の光輪を背負った聖なる鳥のシークレットモンスター。" },
+            { id: 110, name: "エクリプス", desc: "月と太陽の力が交差する神秘的な魔獣シークレットモンスター。" },
+            { id: 111, name: "ネビュラ・キャット", desc: "星雲のグラデーション模様を持つ気高き猫のシークレットモンスター。" },
+            { id: 112, name: "オーロラ・ウィング", desc: "極光の翼で天空を舞う美しい鳥型フレンズのシークレットモンスター。" },
+            { id: 113, name: "クロノ・スフィア", desc: "時空の歪みを閉じ込めた神秘の球体生命シークレットモンスター。" },
+            { id: 114, name: "プリズム・ゴーレム", desc: "光を七色に反射する宝石の鎧を着た巨人シークレットモンスター。" },
+            { id: 115, name: "ゼニス・ファントム", desc: "天頂の星に仕える謎めいた幻影騎士シークレットモンスター。" },
+            { id: 116, name: "クエーサー", desc: "宇宙の果てから強烈な光を放つ魔神のシークレットモンスター。" },
+            { id: 117, name: "コンステレーション", desc: "星座のラインが体表に浮かぶ神聖な獣のシークレットモンスター。" },
+            { id: 118, name: "アルタイル・ウルフ", desc: "夏の大三角の輝きを宿す孤高の狼シークレットモンスター。" },
+            { id: 119, name: "ベガ・プリンセス", desc: "夜空で最も美しく輝く織姫のような妖精シークレットモンスター。" },
+            { id: 120, name: "ジ・エンド・スター", desc: "すべての星の輝きを集めたシークレットの極みモンスター。" }
+        ];
+
+        const mythImageMap = {
+            121: "121.ゼウス.webp",
+            122: "122.アマテラス.webp",
+            123: "123.ポセイドン.webp",
+            124: "124.ヴァルキリー.webp",
+            125: "125.バハムート.webp",
+            126: "126.ユニコーン.webp",
+            127: "127.オーディン.webp",
+            128: "128.アテナ.webp",
+            129: "129.ケルベロス.webp",
+            130: "130.ペガサス.webp",
+            131: "131.アヌビス.webp",
+            132: "132.ツクヨミ.webp",
+            133: "133.スサノオ.webp",
+            134: "134.シルフ.webp",
+            135: "135.タイタン.webp",
+            136: "136.ウンディーネ.webp",
+            137: "137.イフリート.webp",
+            138: "138.ガルーダ.webp",
+            139: "139.ヘラクレス.webp",
+            140: "140.アポロン.webp",
+            141: "141.トール.webp",
+            142: "142.グリフォン.webp",
+            143: "143.キマイラ.webp",
+            144: "144.レヴィアタン.webp",
+            145: "145.ベヒーモス.webp",
+            146: "146.クラーケン.webp",
+            147: "147.アルテミス.webp",
+            148: "148.ヘスティア.webp",
+            149: "149.フレイヤ.webp",
+            150: "150.創世神アルファ.webp"
+        };
+
+        const s1ImageMap = {
+            151: "151.うさぎの魔法使い.webp",
+            152: "152.猫の騎士.webp",
+            153: "153.青いドラゴン.webp",
+            154: "154.ペンギン冒険家.webp",
+            155: "155.キツネのパン職人.webp",
+            156: "156.カゲロウ・ウルフ.webp",
+            157: "157.ライガ・ブルードラゴン.webp",
+            158: "158.ルナ・ノワール.webp",
+            159: "159.アカネ・フェニックス.webp",
+            160: "160.セイル・グリフォン.webp"
+        };
+
+        const bossImageMap = {
+            1: "boss_candy_dragon.webp",
+            2: "boss_seiren_queen.webp",
+            3: "boss_volcanos.webp",
+            4: "boss_armageddon.webp"
+        };
+
+        const mythDetails = [
+            { id: 121, name: "ゼウス", isFemale: false, type: "でんき", desc: "雷鳴を操る全知全能の神話最高神。圧倒的な雷撃を放つ。" },
+            { id: 122, name: "アマテラス", isFemale: true, type: "ひかり", desc: "世界を温かく照らす太陽の女神。八咫鏡の輝きが神秘的。" },
+            { id: 123, name: "ポセイドン", isFemale: false, type: "みず", desc: "大海原を司る荒ぶる海の神。三叉の槍で津波を起こす。" },
+            { id: 124, name: "ヴァルキリー", isFemale: true, type: "ひかり", desc: "戦場を舞う美しき乙女騎士。白銀の翼と聖剣を持つ。" },
+            { id: 125, name: "バハムート", isFemale: false, type: "やみ", desc: "竜の頂点に立つ究極の幻獣。漆黒の炎で全てを灰にする。" },
+            { id: 126, name: "ユニコーン", isFemale: true, type: "ひかり", desc: "純潔の心を持つ夢幻の聖獣。一角から奇跡の癒しを放つ。" },
+            { id: 127, name: "オーディン", isFemale: false, type: "やみ", desc: "北欧の神々を率いる最高神。必中の槍グングニルを持つ。" },
+            { id: 128, name: "アテナ", isFemale: true, type: "ひかり", desc: "知恵と戦術を司る気高く美しい女神。黄金の盾を掲げる。" },
+            { id: 129, name: "ケルベロス", isFemale: false, type: "ほのお", desc: "冥界の門を守る三つの頭を持つ魔獣。紅蓮の炎を吐く。" },
+            { id: 130, name: "ペガサス", isFemale: true, type: "ひかり", desc: "星空を駆ける優雅な有翼の天馬。純白の翼が美しい。" },
+            { id: 131, name: "アヌビス", isFemale: false, type: "やみ", desc: "エジプトの死者を見守る神秘の神。漆黒の装束を纏う。" },
+            { id: 132, name: "ツクヨミ", isFemale: true, type: "やみ", desc: "夜の国を静かに治める月華の女神。三日月が光り輝く。" },
+            { id: 133, name: "スサノオ", isFemale: false, type: "みず", desc: "ヤマタノオロチを打ち倒した荒神。十拳剣の剣技が冴える。" },
+            { id: 134, name: "シルフ", isFemale: true, type: "くさ", desc: "風の精霊たちの女王。愛らしい笑顔と透き通る羽を持つ。" },
+            { id: 135, name: "タイタン", isFemale: false, type: "くさ", desc: "大地を揺るがす巨神。圧倒的なパワーで岩山も砕く。" },
+            { id: 136, name: "ウンディーネ", isFemale: true, type: "みず", desc: "澄み渡る清流の水の精霊。美しい水滴のドレスを纏う。" },
+            { id: 137, name: "イフリート", isFemale: false, type: "ほのお", desc: "灼熱の炎から生まれた魔神。熱い闘志で爆炎を燃やす。" },
+            { id: 138, name: "ガルーダ", isFemale: false, type: "ほのお", desc: "天空を制覇する金色の怪鳥。鋭い爪と翼で風を切る。" },
+            { id: 139, name: "ヘラクレス", isFemale: false, type: "でんき", desc: "数々の試練を乗り越えた最強の英雄。無敵の腕力を誇る。" },
+            { id: 140, name: "アポロン", isFemale: false, type: "ひかり", desc: "光と芸術を司る美しい男神。黄金の弓矢を射抜く。" },
+            { id: 141, name: "トール", isFemale: false, type: "でんき", desc: "雷槌ミョルニルを振るう雷の戦神。巨人も一撃で倒す。" },
+            { id: 142, name: "グリフォン", isFemale: false, type: "ひかり", desc: "鷲の頭とライオンの体を持つ幻獣。空の王者とされる。" },
+            { id: 143, name: "キマイラ", isFemale: false, type: "ほのお", desc: "複数の獣が合体した伝説の異形獣。多重属性の息を吐く。" },
+            { id: 144, name: "レヴィアタン", isFemale: false, type: "みず", desc: "深海に眠る巨大な水竜。海流を自由に自在に操る。" },
+            { id: 145, name: "ベヒーモス", isFemale: false, type: "くさ", desc: "陸上のいかなる獣よりも巨大な伝説獣。大地を踏み荒らす。" },
+            { id: 146, name: "クラーケン", isFemale: false, type: "みず", desc: "船をも飲み込む巨大な深海の魔獣。無数の触手を持つ。" },
+            { id: 147, name: "アルテミス", isFemale: true, type: "ひかり", desc: "月夜の森を駆け抜ける狩猟の女神。可憐で鋭い射手。" },
+            { id: 148, name: "ヘスティア", isFemale: true, type: "ほのお", desc: "聖なる火を守る温かい聖女神。みんなを優しく包む。" },
+            { id: 149, name: "フレイヤ", isFemale: true, type: "ひかり", desc: "愛と美を司る女神。愛らしい猫の馬車で空中を散歩する。" },
+            { id: 150, name: "創世神アルファ", isFemale: false, type: "ひかり", desc: "世界の始まりを司る至高の創世神。無限の光を秘める。" }
+        ];
+
+        const season1Details = [
+            { id: 151, name: "うさぎの魔法使い", isFancy: true, type: "ひかり", desc: "星降る夜に奇跡を紡ぐ、月影の魔法使い" },
+            { id: 152, name: "猫の騎士", isFancy: false, type: "ひかり", desc: "小さな剣に誓いを込めた、誇り高き騎士" },
+            { id: 153, name: "青いドラゴン", isFancy: false, type: "みず", desc: "花咲く森に暮らす、炎を宿した森の子" },
+            { id: 154, name: "ペンギン冒険家", isFancy: true, type: "みず", desc: "白銀の大地を旅する、勇気あふれる探検家" },
+            { id: 155, name: "キツネのパン職人", isFancy: true, type: "ほのお", desc: "森の小さな工房で夢を焼き上げるパン職人" },
+            { id: 156, name: "カゲロウ・ウルフ", isFancy: false, type: "やみ", desc: "桜舞う竹林で、月影を斬る銀狼の侍" },
+            { id: 157, name: "ライガ・ブルードラゴン", isFancy: false, type: "でんき", desc: "稲妻を纏い、天空を駆ける蒼き竜騎士" },
+            { id: 158, name: "ルナ・ノワール", isFancy: false, type: "やみ", desc: "紫月の都に潜む、孤高なる夜の盗賊" },
+            { id: 159, name: "アカネ・フェニックス", isFancy: false, type: "ほのお", desc: "火山の空を舞う、再生を司る紅蓮の戦士" },
+            { id: 160, name: "セイル・グリフォン", isFancy: false, type: "ひかり", desc: "雲海を越え、黎明を守る白銀の翼騎士" }
+        ];
+
+        const monstersData = [];
+        for(let i=1; i<=160; i++) {
+            let rarity = 1;
+            if(i > 20 && i <= 50) rarity = 2;
+            if(i > 50 && i <= 85) rarity = 3;
+            if(i > 85 && i <= 100) rarity = 4;
+            if(i > 100 && i <= 120) rarity = 5;
+            if(i > 120 && i <= 150) rarity = 5;
+            if(i >= 151) rarity = 5;
+
+            let isFancy = (i >= 151) ? season1Details[i-151].isFancy : (i % 2 === 0);
+            let name = "", desc = "", mType = types[(i - 1) % types.length];
+
+            if (i >= 151) {
+                let s = season1Details[i-151];
+                name = s.name; desc = s.desc; isFancy = s.isFancy; mType = s.type;
+            } else if (i >= 121) {
+                let m = mythDetails[i-121];
+                name = m.name; desc = m.desc; isFancy = m.isFemale; mType = m.type;
+            } else if (i >= 101 && i <= 120) {
+                let sec = secretDetails[i-101];
+                name = sec.name; desc = sec.desc;
+            } else {
+                name = namesPart1[(i - 1) % namesPart1.length] + namesPart2[(i - 1) % namesPart2.length];
+                desc = isFancy ? '女の子に大人気のゆめかわいいキュートなファンシーフレンズ。' : '男の子好みの鋭い眼光と力強い装甲を持つかっこいいモンスター。';
+            }
+
+            monstersData.push({
+                id: i, name: name, rarity: rarity, type: mType,
+                isFancy: isFancy, desc: desc, hp: rarity * 15 + 10,
+                baseCatch: [0, 85, 65, 45, 30, 15][rarity],
+                isSecretEnd: (i >= 101 && i <= 120),
+                isMythOnly: (i >= 121 && i <= 150),
+                isSeason1: (i >= 151)
+            });
+        }
+
+        function getMonsterVisualHTML(id, rarity, isFancy, isShiny) {
+            if (id >= 151 && id <= 160 && s1ImageMap[id]) {
+                let imgPath = s1ImageMap[id];
+                let shinyFilter = isShiny ? 'filter: drop-shadow(0 0 16px #00ffff) brightness(1.2) saturate(1.3);' : 'filter: drop-shadow(0 0 10px rgba(255,215,0,0.8));';
+                return `<img src="${imgPath}" alt="S1限定 #${id}" class="w-full h-full object-cover rounded-2xl" style="${shinyFilter}">`;
+            }
+
+            if (id >= 121 && id <= 150 && mythImageMap[id]) {
+                let imgPath = mythImageMap[id];
+                let shinyFilter = isShiny ? 'filter: drop-shadow(0 0 16px #00ffff) brightness(1.2) saturate(1.3);' : 'filter: drop-shadow(0 0 10px rgba(255,215,0,0.8));';
+                return `<img src="${imgPath}" alt="神話生物 #${id}" class="w-full h-full object-cover rounded-2xl" style="${shinyFilter}">`;
+            }
+
+            let baseHue = (id * 29) % 360;
+            let hue = isShiny ? (baseHue + 160) % 360 : baseHue;
+            let glow = isShiny ? 'filter: drop-shadow(0 0 16px #00ffff);' : 'filter: drop-shadow(0 0 8px rgba(255,215,0,0.8));';
+
+            if (id >= 101 && id <= 120) {
+                return `<svg viewBox="0 0 100 100" class="w-full h-full" style="filter: drop-shadow(0 0 20px #ffd700);">
+                    <polygon points="50,5 63,35 95,35 69,55 78,88 50,70 22,88 31,55 5,35 37,35" fill="#ffd700" stroke="#fff" stroke-width="2"/>
+                    <circle cx="50" cy="50" r="16" fill="hsl(${hue}, 95%, 50%)" stroke="#fff" stroke-width="2.5"/>
+                    <circle cx="43" cy="46" r="3.5" fill="#fff"/><circle cx="57" cy="46" r="3.5" fill="#fff"/>
+                </svg>`;
+            }
+            else {
+                if (isFancy) {
+                    return `<svg viewBox="0 0 100 100" class="w-full h-full" style="${glow}">
+                        <ellipse cx="50" cy="56" rx="30" ry="26" fill="hsl(${hue}, 85%, 75%)" stroke="#fff" stroke-width="3"/>
+                        <circle cx="40" cy="50" r="4.5" fill="#444"/><circle cx="60" cy="50" r="4.5" fill="#444"/>
+                        <path d="M 42 62 Q 50 70 58 62" stroke="#444" stroke-width="2.5" fill="none"/>
+                        <circle cx="50" cy="24" r="8" fill="hsl(${(hue+40)%360}, 90%, 70%)"/>
+                    </svg>`;
+                } else {
+                    return `<svg viewBox="0 0 100 100" class="w-full h-full" style="${glow}">
+                        <polygon points="50,20 78,40 70,80 30,80 22,40" fill="hsl(${hue}, 80%, 40%)" stroke="#fff" stroke-width="2.5"/>
+                        <polygon points="50,32 62,50 50,68 38,50" fill="#ffd700"/>
+                        <polygon points="35,22 45,35 28,38" fill="hsl(${hue}, 80%, 30%)"/>
+                        <polygon points="65,22 55,35 72,38" fill="hsl(${hue}, 80%, 30%)"/>
+                        <circle cx="41" cy="45" r="3.5" fill="#00ffff"/><circle cx="59" cy="45" r="3.5" fill="#00ffff"/>
+                    </svg>`;
+                }
+            }
+        }
+
+        function getBossSVG(grade) {
+            if (bossImageMap[grade]) {
+                let imgPath = bossImageMap[grade];
+                return `<img src="${imgPath}" alt="ボス Grade ${grade}" class="w-full h-full object-cover rounded-2xl filter drop-shadow-[0_0_20px_rgba(255,0,0,0.8)]">`;
+            }
+
+            if (grade === 1) return `<svg viewBox="0 0 100 100" class="w-full h-full filter drop-shadow-[0_0_15px_#ff69b4]"><circle cx="50" cy="50" r="38" fill="#f472b6" stroke="#fff" stroke-width="3"/><polygon points="50,15 60,30 40,30" fill="#ffd700"/></svg>`;
+            if (grade === 2) return `<svg viewBox="0 0 100 100" class="w-full h-full filter drop-shadow-[0_0_15px_#38bdf8]"><path d="M 50 10 Q 80 40 50 90 Q 20 40 50 10 Z" fill="#38bdf8" stroke="#fff" stroke-width="3"/></svg>`;
+            if (grade === 3) return `<svg viewBox="0 0 100 100" class="w-full h-full filter drop-shadow-[0_0_20px_#ff4500]"><polygon points="50,5 85,30 75,85 25,85 15,30" fill="#ea580c" stroke="#ffd700" stroke-width="3"/></svg>`;
+            return `<svg viewBox="0 0 100 100" class="w-full h-full filter drop-shadow-[0_0_25px_#a855f7]"><polygon points="50,0 65,30 100,35 75,60 85,95 50,75 15,95 25,60 0,35 35,30" fill="#7e22ce" stroke="#00ffff" stroke-width="3"/></svg>`;
+        }
+
+        function switchScreen(screenId) {
+            playSound('click');
+            ['home', 'battle', 'boss', 'titles', 'pokedex', 'shop', 'skills', 'treasures'].forEach(s => {
+                document.getElementById('screen-' + s).classList.add('hidden');
+            });
+            document.getElementById('screen-' + screenId).classList.remove('hidden');
+
+            updateHeader();
+            if (screenId === 'home') changeBgmMode('home');
+            if (screenId === 'boss') { initBossSetupUI(); changeBgmMode('boss'); }
+            if (screenId === 'titles') renderTitlesRoom();
+            if (screenId === 'pokedex') { updateDexCounts(); renderPokedex(); }
+            if (screenId === 'shop') updateShopUI();
+            if (screenId === 'skills') updateSkillsUI();
+            if (screenId === 'treasures') renderTreasures();
+        }
+
+        function updateHeader() {
+            document.getElementById('header-status').innerText = `Lv.${gameState.level} | EXP: ${gameState.exp}/${gameState.expNext}`;
+            document.getElementById('player-coins').innerText = gameState.coins;
+            document.getElementById('player-gems').innerText = gameState.gems;
+            document.getElementById('player-rainbow-pieces').innerText = gameState.rainbowPieces;
+            document.getElementById('sp-count').innerText = gameState.sp;
+
+            if(getNormalCaughtCount() >= 150 || getShinyCaughtCount() >= 150) {
+                document.getElementById('home-crown-badge').classList.remove('hidden');
+            }
+        }
+
+        let currentMonster = null, currentProblem = {}, currentHP = 0, maxHP = 0, currentCatchRate = 0;
+        let isProcessingCatch = false, isAnsweringRetry = false, isAnsweringMath = false, isExchangingGem = false;
+        let problemStartTime = 0, critTimerInterval = null;
+
+        function selectArea(areaId) {
+            gameState.selectedArea = areaId;
+            switchScreen('battle');
+            if (areaId === 1) changeBgmMode('forest');
+            else if (areaId === 2) changeBgmMode('ocean');
+            else if (areaId === 3) changeBgmMode('volcano');
+            else changeBgmMode('sky');
+            startNewEncounter();
+        }
+
+        function confirmReturnHome() {
+            if (confirm("ホーム画面に戻りますか？")) {
+                if(critTimerInterval) clearInterval(critTimerInterval);
+                switchScreen('home');
+            }
+        }
+
+        function updateBattleCaughtBadge() {
+            if(!currentMonster) return;
+            let c = gameState.caught[currentMonster.id];
+            let normalEl = document.getElementById('caught-status-normal');
+            let shinyEl = document.getElementById('caught-status-shiny');
+
+            if (c && c.count > 0) {
+                normalEl.innerHTML = `📖 登録: <span class="text-yellow-300 font-extrabold">ゲット済(x${c.count})</span>`;
+                normalEl.className = "text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-400 text-emerald-200 font-bold";
+            } else {
+                normalEl.innerHTML = `📖 登録: 未発見`;
+                normalEl.className = "text-[11px] px-2.5 py-0.5 rounded-full bg-black/50 border border-white/20 text-purple-200 font-bold";
+            }
+
+            if (c && c.shiny) {
+                shinyEl.innerHTML = `✨ 色違い: <span class="text-yellow-300 font-extrabold">ゲット済</span>`;
+                shinyEl.className = "text-[11px] px-2.5 py-0.5 rounded-full bg-pink-950/80 border border-pink-400 text-pink-200 font-bold";
+            } else {
+                shinyEl.innerHTML = `✨ 色違い: 未発見`;
+                shinyEl.className = "text-[11px] px-2.5 py-0.5 rounded-full bg-black/50 border border-pink-400/40 text-pink-300 font-bold";
+            }
+        }
+
+        function updateBattleTypeStyles(type) {
+            const borders = {
+                'ほのお': 'border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.3)]',
+                'みず': 'border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]',
+                'くさ': 'border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)]',
+                'でんき': 'border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.3)]',
+                'ひかり': 'border-amber-300 shadow-[0_0_20px_rgba(252,211,77,0.4)]',
+                'やみ': 'border-purple-600 shadow-[0_0_20px_rgba(147,51,234,0.4)]'
+            };
+            let container = document.getElementById('battle-box-container');
+            container.className = `bg-white/10 backdrop-blur-md p-6 rounded-3xl border-2 text-center shadow-2xl relative transition-all duration-500 ${borders[type] || 'border-white/20'}`;
+            document.getElementById('monster-type-badge').innerHTML = getTypeBadgeHTML(type);
+        }
+
+        function startNewEncounter() {
+            isProcessingCatch = false; isAnsweringRetry = false; isAnsweringMath = false;
+            if(critTimerInterval) clearInterval(critTimerInterval);
+
+            document.getElementById('math-problem-box').classList.remove('hidden');
+            document.getElementById('catch-phase-box').classList.add('hidden');
+            document.getElementById('retry-phase-box').classList.add('hidden');
+            document.getElementById('shiny-particle-layer').innerHTML = '';
+
+            if (gameState.activeEncounter && gameState.activeEncounter.area === gameState.selectedArea) {
+                let enc = gameState.activeEncounter;
+                currentMonster = monstersData.find(m => m.id === enc.monsterId);
+                currentMonster.isShiny = enc.isShiny;
+                maxHP = currentMonster.hp; currentHP = enc.currentHP;
+            } else {
+                let totalCaught = Object.keys(gameState.caught).length;
+                let shinyChance = totalCaught >= 120 ? 0.10 : totalCaught >= 60 ? 0.05 : totalCaught >= 36 ? 0.03 : 0.01;
+                let isShiny = Math.random() < shinyChance;
+                
+                let available = [];
+                if (isFirst100Completed() && Math.random() < 0.04) {
+                    available = monstersData.filter(m => m.id >= 101 && m.id <= 120);
+                } else if (Math.random() < 0.04) {
+                    available = monstersData.filter(m => m.isSeason1);
+                } else {
+                    let rand = Math.random() * 100, rTarget = 1, area = gameState.selectedArea;
+                    if (area === 1) rTarget = rand < 60 ? 1 : rand < 90 ? 2 : rand < 98 ? 3 : 4;
+                    else if (area === 2) rTarget = rand < 40 ? 1 : rand < 75 ? 2 : rand < 93 ? 3 : 4;
+                    else if (area === 3) rTarget = rand < 20 ? 1 : rand < 55 ? 2 : rand < 85 ? 3 : 4;
+                    else rTarget = rand < 10 ? 1 : rand < 30 ? 2 : rand < 65 ? 3 : 4;
+
+                    available = monstersData.filter(m => m.rarity === rTarget && !m.isSecretEnd && !m.isMythOnly && !m.isSeason1);
+                }
+                if(available.length === 0) available = monstersData.filter(m => !m.isSecretEnd && !m.isMythOnly && !m.isSeason1);
+
+                currentMonster = available[Math.floor(Math.random() * available.length)];
+                currentMonster.isShiny = isShiny;
+                maxHP = currentMonster.hp; currentHP = maxHP;
+
+                gameState.activeEncounter = { area: gameState.selectedArea, monsterId: currentMonster.id, isShiny: isShiny, currentHP: currentHP };
+                saveGame();
+            }
+
+            document.getElementById('battle-area-label').innerText = `エリア ${gameState.selectedArea} | 遭遇`;
+            document.getElementById('monster-rarity-badge').innerText = `★${currentMonster.rarity}${currentMonster.isShiny ? ' ✨シャイニー' : ''}`;
+            document.getElementById('monster-name').innerText = (currentMonster.isShiny ? '✨色違い ' : '') + currentMonster.name;
+            document.getElementById('monster-flavor').innerText = currentMonster.desc;
+            
+            updateBattleTypeStyles(currentMonster.type);
+            updateBattleCaughtBadge();
+            document.getElementById('monster-svg-container').innerHTML = getMonsterVisualHTML(currentMonster.id, currentMonster.rarity, currentMonster.isFancy, currentMonster.isShiny);
+
+            if (currentMonster.isShiny) {
+                playSound('shiny');
+                document.getElementById('shiny-particle-layer').innerHTML = '<div class="absolute text-3xl animate-ping">✨🌟✨</div>';
+                showEpicFX('✨🦄✨', '激レア・シャイニー遭遇！！', `色違いの「${currentMonster.name}」が現れた！`);
+            }
+            updateHPBar();
+            generateMathProblem();
+        }
+
+        function updateHPBar() {
+            let pct = (currentHP / maxHP) * 100;
+            document.getElementById('monster-hp-bar').style.width = pct + '%';
+            document.getElementById('monster-hp-text').innerText = `HP: ${currentHP}/${maxHP}`;
+            if(gameState.activeEncounter) { gameState.activeEncounter.currentHP = currentHP; saveGame(); }
+        }
+
+        function generateMathProblem() {
+            isAnsweringMath = false;
+            if(critTimerInterval) clearInterval(critTimerInterval);
+            let area = gameState.selectedArea, critLimitSec = area === 2 ? 5.0 : area === 3 ? 7.0 : area === 4 ? 10.0 : 5.0;
+            document.getElementById('crit-timer-sec').innerText = critLimitSec.toFixed(1);
+            problemStartTime = Date.now();
+
+            critTimerInterval = setInterval(() => {
+                let remainSec = Math.max(0, critLimitSec - (Date.now() - problemStartTime) / 1000).toFixed(1);
+                document.getElementById('crit-timer-sec').innerText = remainSec;
+            }, 100);
+
+            let text = "", ans = 0;
+            let attempts = 0;
+
+            do {
+                attempts++;
+                if (area === 1) {
+                    let randType = Math.random();
+                    if (randType < 0.35) {
+                        let a = Math.floor(Math.random() * 9) + 1;
+                        ans = 10 - a; text = `${a} + ? = 10`;
+                    } else if (randType < 0.65) {
+                        let a = Math.floor(Math.random() * 8) + 1, b = Math.floor(Math.random() * 8) + 1;
+                        ans = a + b; text = `${a} + ${b} = ?`;
+                    } else if (randType < 0.85) {
+                        let a = Math.floor(Math.random() * 8) + 2, b = Math.floor(Math.random() * (a - 1)) + 1;
+                        ans = a - b; text = `${a} - ${b} = ?`;
+                    } else {
+                        let a = Math.floor(Math.random() * 4) + 1, b = Math.floor(Math.random() * 4) + 1, c = Math.floor(Math.random() * 4) + 1;
+                        ans = a + b + c; text = `${a} + ${b} + ${c} = ?`;
+                    }
+                } else if (area === 2) {
+                    let randType = Math.random();
+                    if (randType < 0.5) {
+                        let a = Math.floor(Math.random() * 9) + 1, b = Math.floor(Math.random() * 9) + 1;
+                        ans = a * b; text = `${a} × ${b} = ?`;
+                    } else if (randType < 0.75) {
+                        let a = Math.floor(Math.random() * 8) + 2, q = Math.floor(Math.random() * 9) + 1;
+                        ans = q; text = `${a} × ? = ${a * q}`;
+                    } else {
+                        if (Math.random() < 0.5) {
+                            let a = Math.floor(Math.random() * 20) + 10, b = Math.floor(Math.random() * 8) + 1;
+                            ans = a + b; text = `${a} + ${b} = ?`;
+                        } else {
+                            let a = Math.floor(Math.random() * 20) + 10, b = Math.floor(Math.random() * 8) + 1;
+                            ans = a - b; text = `${a} - ${b} = ?`;
+                        }
+                    }
+                } else if (area === 3) {
+                    let randType = Math.random();
+                    if (randType < 0.35) {
+                        let b = Math.floor(Math.random() * 8) + 2, q = Math.floor(Math.random() * 8) + 2;
+                        ans = q; text = `${b * q} ÷ ${b} = ?`;
+                    } else if (randType < 0.65) {
+                        let b = Math.floor(Math.random() * 7) + 3, q = Math.floor(Math.random() * 6) + 2, r = Math.floor(Math.random() * (b - 1)) + 1;
+                        ans = r; text = `${b * q + r} ÷ ${b} の「あまり」は？`;
+                    } else if (randType < 0.85) {
+                        let a = Math.floor(Math.random() * 12) + 11, b = Math.floor(Math.random() * 8) + 2;
+                        ans = a * b; text = `${a} × ${b} = ?`;
+                    } else {
+                        let a = Math.floor(Math.random() * 30) + 10, b = Math.floor(Math.random() * 30) + 10;
+                        ans = a + b; text = `${a} + ${b} = ?`;
+                    }
+                } else {
+                    let n1 = Math.floor(Math.random() * 12) + 2, n2 = Math.floor(Math.random() * 12) + 2, n3 = Math.floor(Math.random() * 10) + 1;
+                    if (Math.random() < 0.5) {
+                        ans = (n1 * n2) + n3; text = `${n1} × ${n2} + ${n3} = ?`;
+                    } else {
+                        ans = (n1 * n2) - n3; text = `${n1} × ${n2} - ${n3} = ?`;
+                    }
+                }
+            } while (problemHistory.includes(text) && attempts < 20);
+
+            problemHistory.push(text);
+            if (problemHistory.length > 5) problemHistory.shift();
+
+            currentProblem = { ans: ans };
+            document.getElementById('problem-text').innerText = text;
+            document.getElementById('answer-input').value = '';
+        }
+
+        function inputNum(val) {
+            playSound('click');
+            let inp = document.getElementById('answer-input');
+            if(val === 'clear') inp.value = '';
+            else if(val === 'minus') { if(!inp.value.startsWith('-')) inp.value = '-' + inp.value; }
+            else { if(inp.value.length < 5) inp.value += val; }
+        }
+
+        function submitAnswer() {
+            if (isAnsweringMath) return;
+            let val = parseInt(document.getElementById('answer-input').value);
+            if(isNaN(val)) return;
+
+            if (val === currentProblem.ans) {
+                isAnsweringMath = true;
+                let timeTakenSec = (Date.now() - problemStartTime) / 1000;
+                if(critTimerInterval) clearInterval(critTimerInterval);
+
+                let area = gameState.selectedArea, critLimitSec = area === 2 ? 5.0 : area === 3 ? 7.0 : area === 4 ? 10.0 : 5.0;
+
+                if (timeTakenSec <= critLimitSec) {
+                    playSound('critical');
+                    let bonusCoin = 25; gameState.coins += bonusCoin; saveGame(); updateHeader();
+                    currentHP = 0; updateHPBar();
+                    showToast('⚡', 'CRITICAL!!', `スピード正解！ 🪙 +${bonusCoin}G！ 一撃撃破！`, 1500, () => enterCatchPhase());
+                    return;
+                }
+                playSound('correct'); saveGame(); updateHeader();
+                
+                let typeMult = 1.0;
+                let baseDmg = Math.ceil(maxHP / (currentMonster.rarity + 1));
+                currentHP -= Math.ceil(baseDmg * typeMult);
+                if(currentHP <= 0) currentHP = 0;
+                updateHPBar();
+                if (currentHP === 0) enterCatchPhase(); else generateMathProblem();
+            } else {
+                playSound('wrong');
+                document.getElementById('answer-input').classList.add('border-red-500');
+                setTimeout(() => document.getElementById('answer-input').classList.remove('border-red-500'), 400);
+            }
+        }
+
+        function enterCatchPhase() {
+            isProcessingCatch = false; isAnsweringRetry = false; isAnsweringMath = false;
+            document.getElementById('math-problem-box').classList.add('hidden');
+            document.getElementById('catch-phase-box').classList.remove('hidden');
+
+            document.getElementById('cnt-fancy').innerText = gameState.balls.fancy;
+            document.getElementById('cnt-super').innerText = gameState.balls.super;
+            document.getElementById('cnt-hyper').innerText = gameState.balls.hyper;
+            document.getElementById('cnt-shiny').innerText = gameState.balls.shiny;
+            document.getElementById('cnt-master').innerText = gameState.balls.master;
+
+            currentCatchRate = currentMonster.baseCatch;
+            document.getElementById('catch-rate-info').innerText = `現在の捕獲確率: ${currentCatchRate}%`;
+        }
+
+        function throwBall(type) {
+            if (isProcessingCatch) return;
+            // normal以外の全ボール（shiny, master含む）で所持数が0以下の場合はガードする
+            if (type !== 'normal' && (gameState.balls[type] || 0) <= 0) {
+                showToast('⚠️', 'ボールがないよ！', 'ショップで買うかドロップでゲットしよう');
+                return;
+            }
+            isProcessingCatch = true;
+            if (type !== 'normal') gameState.balls[type]--;
+
+            let mult = type === 'fancy' ? 1.5 : type === 'super' ? 2.0 : type === 'hyper' ? 3.0 : 1.0;
+            if(type === 'shiny' || type === 'master') currentCatchRate = 100;
+            let finalRate = Math.min(100, currentCatchRate * mult);
+
+            if (type === 'shiny') {
+                currentMonster.isShiny = true; updateBattleCaughtBadge();
+                showEpicFX('✨🎀✨', 'シャイニーボール発動！！', `ボールの奇跡で「${currentMonster.name}」が色違いに変化した！`, () => { playSound('catch'); onCatchSuccess(); });
+                return;
+            }
+            if (Math.random() * 100 <= finalRate) { playSound('catch'); onCatchSuccess(); }
+            else { playSound('wrong'); showToast('💨', 'ボールから飛び出した！', '算数を解いて捕獲率をブーストしよう！', 1400, () => enterRetryPhase()); }
+        }
+
+        function enterRetryPhase() {
+            isProcessingCatch = false; isAnsweringRetry = false;
+            document.getElementById('catch-phase-box').classList.add('hidden');
+            document.getElementById('retry-phase-box').classList.remove('hidden');
+            let n1 = Math.floor(Math.random() * 9) + 1, n2 = Math.floor(Math.random() * 9) + 1;
+            window.retryAns = n1 + n2;
+            document.getElementById('retry-problem-text').innerText = `${n1} + ${n2} = ? (成功で捕獲率+3%)`;
+            document.getElementById('retry-answer-input').value = '';
+        }
+
+        function inputRetryNum(val) {
+            playSound('click');
+            let inp = document.getElementById('retry-answer-input');
+            if(val === 'clear') inp.value = '';
+            else if(val === 'minus') { if(!inp.value.startsWith('-')) inp.value = '-' + inp.value; }
+            else { if(inp.value.length < 5) inp.value += val; }
+        }
+
+        function submitRetryAnswer() {
+            if (isAnsweringRetry) return;
+            let val = parseInt(document.getElementById('retry-answer-input').value);
+            if(isNaN(val)) return;
+            if(val === window.retryAns) {
+                isAnsweringRetry = true; playSound('correct');
+                currentCatchRate = Math.min(100, currentCatchRate + 3);
+                showToast('✨', 'せいかい！', `捕獲率が +3% アップして ${currentCatchRate}% になった！`, 1400, () => {
+                    document.getElementById('retry-phase-box').classList.add('hidden');
+                    document.getElementById('catch-phase-box').classList.remove('hidden');
+                    document.getElementById('catch-rate-info').innerText = `現在の捕獲確率: ${currentCatchRate}%`;
+                    isProcessingCatch = false; isAnsweringRetry = false;
+                });
+            } else { playSound('wrong'); enterRetryPhase(); }
+        }
+
+        function checkCompletionAndCelebrate() {
+            let normalCount = getNormalCaughtCount(), shinyCount = getShinyCaughtCount();
+            if (normalCount >= 150 && shinyCount >= 150 && !gameState.celebrated.all300) {
+                gameState.celebrated.all300 = true; saveGame();
+                triggerCelebrateModal('🏆 300体 フルコンプリート！！ 👑', '信じられない快挙です！全300体を完全制覇しました！君こそ歴史に名を残す最強の算数マスターです！');
+                return true;
+            } else if (normalCount >= 150 && !gameState.celebrated.normal150) {
+                gameState.celebrated.normal150 = true; saveGame();
+                triggerCelebrateModal('📖 ノーマル図鑑 150体コンプリート！！ 👑', 'おめでとう！すべてのノーマルモンスターを集め切りました！【神々の秘石】召喚権が解放！');
+                return true;
+            } else if (shinyCount >= 150 && !gameState.celebrated.shiny150) {
+                gameState.celebrated.shiny150 = true; saveGame();
+                triggerCelebrateModal('✨ シャイニー図鑑 150体コンプリート！！ 👑', 'すごすぎる！すべての色違いモンスターをコンプリートしました！');
+                return true;
+            }
+            return false;
+        }
+
+        function triggerCelebrateModal(title, bodyText) {
+            playSound('fanfare');
+            document.getElementById('cel-title').innerText = title;
+            document.getElementById('cel-body').innerText = bodyText;
+            document.getElementById('modal-celebrate').classList.remove('hidden');
+        }
+
+        function closeCelebrateModal() { playSound('click'); document.getElementById('modal-celebrate').classList.add('hidden'); }
+
+        function checkLuckyEvents() {
+            let rand = Math.random();
+            if (rand < (1 / 500)) {
+                playSound('super_lucky'); gameState.rainbowPieces += 3; saveGame(); updateHeader();
+                showEpicFX('🌟✨🌈✨🌟', 'SUPER LUCKY!! 発動！！', '奇跡のスーパーラッキー！「🌈虹のかけら」を 3個 獲得！');
+            } else if (rand < (1 / 200)) {
+                playSound('shiny'); gameState.rainbowPieces += 1; saveGame(); updateHeader();
+                showEpicFX('🍀✨🌈', 'LUCKY!! 発動！', 'ラッキー発生！「🌈虹のかけら」を 1個 獲得！');
+            }
+        }
+
+        function onCatchSuccess() {
+            let id = currentMonster.id;
+            if(!gameState.caught[id]) gameState.caught[id] = { count: 0, shiny: false, powerLevel: 0 };
+            gameState.caught[id].count++;
+            if(currentMonster.isShiny) gameState.caught[id].shiny = true;
+
+            let coinBonus = currentMonster.rarity * 10 + (gameState.skills.coin * 5); gameState.coins += coinBonus;
+            let expGain = currentMonster.rarity * 20 * (gameState.selectedArea === 4 ? 2 : 1); gameState.exp += expGain;
+
+            let leveledUp = false;
+            if(gameState.exp >= gameState.expNext) {
+                gameState.level++; gameState.exp -= gameState.expNext;
+                gameState.expNext = Math.floor(gameState.expNext * 1.3); gameState.sp += 2; leveledUp = true;
+            }
+
+            let gemEarned = gameState.selectedArea === 1 ? (Math.random() < 0.5 ? 1 : 0) : gameState.selectedArea <= 3 ? (Math.random() < 0.75 ? 1 : 0) : (Math.floor(Math.random() * 3) + 1);
+            gameState.gems += gemEarned;
+
+            let earnedItem = null;
+            if(Math.random() < (0.05 + gameState.skills.drop * 0.01)) {
+                let items = ['fancy', 'super'];
+                if(gameState.selectedArea >= 3 && Math.random() < 0.02) items.push('hyper');
+                if(gameState.selectedArea === 4 && Math.random() < 0.005) items.push('master');
+                earnedItem = items[Math.floor(Math.random() * items.length)]; gameState.balls[earnedItem]++;
+            }
+
+            let earnedTreasure = null;
+            if(Math.random() < 0.01) {
+                let tId = Math.floor(Math.random() * treasuresData.length) + 1;
+                gameState.treasures[tId] = (gameState.treasures[tId] || 0) + 1;
+                earnedTreasure = treasuresData[tId-1].name;
+            }
+
+            gameState.activeEncounter = null; saveGame(); updateHeader(); checkLuckyEvents();
+
+            let title = `${currentMonster.name} をゲット！`;
+            let msg = `🪙 +${coinBonus}G | ⭐ +${expGain}EXP`;
+            if(gemEarned > 0) msg += ` | 💎 +${gemEarned}`;
+            if(earnedItem) msg += ` | 🎁 ${earnedItem}ボール`;
+            if(leveledUp) msg += ` 🌟LV.UP(${gameState.level})!`;
+
+            showToast('🎉', title, msg, 1800, () => {
+                if (earnedTreasure) {
+                    showEpicFX('💎✨', '激レアほうもつゲット！！', `「${earnedTreasure}」を手に入れた！`, () => {
+                        if(!checkCompletionAndCelebrate()) startNewEncounter();
+                    });
+                } else {
+                    if(!checkCompletionAndCelebrate()) startNewEncounter();
+                }
+            });
+        }
+
+        let bossState = { grade: 1, diff: 'easy', partnerId: null, partnerShiny: false, bossHP: 400, bossMaxHP: 400, partnerHP: 500, partnerMaxHP: 500, bossAtk: 45, partnerAtk: 10, partnerDef: 10, isBossTurn: false, currentProblemAns: 0, problemStart: 0 };
+        let isBossProcessing = false;
+        const bossGradeData = {
+            1: { name: 'おかしの巨竜 キャンディドラゴ', emoji: '🍬', title: 'キャンディマスター', theme: 'boss1', type: 'ほのお' },
+            2: { name: '深海の歌姫 セイレーンクィーン', emoji: '🧜‍♀️', title: '深海の覇者', theme: 'boss2', type: 'みず' },
+            3: { name: '火炎の邪神 ヴォルカノス', emoji: '🌋', title: '炎神', theme: 'boss3', type: 'ほのお' },
+            4: { name: '終焉の神王 アルマゲドン', emoji: '👑', title: '算数神', theme: 'boss4', type: 'やみ' }
+        };
+
+        function abandonBossBattle() {
+            if (confirm("ボス戦をあきらめて準備画面に戻りますか？")) {
+                isBossProcessing = false;
+                document.getElementById('boss-battle-view').classList.add('hidden');
+                document.getElementById('boss-setup-view').classList.remove('hidden');
+                showToast('🏳️', 'あきらめた', 'ボス戦の準備画面に戻りました');
+            }
+        }
+
+        function initBossSetupUI() {
+            let partnerSelector = document.getElementById('boss-partner-selector');
+            partnerSelector.innerHTML = '';
+            let caughtIds = Object.keys(gameState.caught).filter(id => gameState.caught[id].count > 0 || gameState.caught[id].shiny);
+            if (caughtIds.length === 0) { partnerSelector.innerHTML = '<span class="text-xs text-red-300">※まずモンスターをゲットしよう！</span>'; return; }
+            if(!bossState.partnerId) bossState.partnerId = parseInt(caughtIds[0]);
+
+            caughtIds.forEach(id => {
+                let m = monstersData.find(x => x.id === parseInt(id)), c = gameState.caught[id];
+                let isSelected = (bossState.partnerId === m.id);
+                let div = document.createElement('div');
+                div.className = `min-w-[100px] p-2 rounded-xl border flex flex-col items-center justify-center transition ${isSelected ? 'bg-amber-500/30 border-yellow-400 scale-105' : 'bg-white/5 border-white/10 opacity-70'}`;
+                
+                let isCurrentShiny = isSelected ? bossState.partnerShiny : false;
+                if(isSelected && !c.shiny && bossState.partnerShiny) bossState.partnerShiny = false;
+
+                div.onclick = () => { 
+                    bossState.partnerId = m.id; 
+                    if (!c.shiny) bossState.partnerShiny = false;
+                    initBossSetupUI(); 
+                };
+
+                let shinyToggleBtn = '';
+                if (c.shiny) {
+                    shinyToggleBtn = `
+                        <button onclick="event.stopPropagation(); bossState.partnerId=${m.id}; bossState.partnerShiny=!bossState.partnerShiny; initBossSetupUI();" class="mt-1 px-1.5 py-0.5 text-[9px] font-black rounded-full ${isCurrentShiny ? 'bg-pink-500 text-white' : 'bg-white/20 text-purple-200'}">
+                            ${isCurrentShiny ? '✨色違い' : '通常形態'}
+                        </button>
+                    `;
+                }
+
+                div.innerHTML = `
+                    <div class="w-10 h-10 flex items-center justify-center">${getMonsterVisualHTML(m.id, m.rarity, m.isFancy, isCurrentShiny)}</div>
+                    <span class="text-[10px] font-bold truncate w-full text-center mt-1">${m.name}</span>
+                    ${shinyToggleBtn}
+                `;
+                partnerSelector.appendChild(div);
+            });
+        }
+
+        function selectBossGrade(g) { playSound('click'); bossState.grade = g; for(let i=1; i<=4; i++) document.getElementById(`card-boss-${i}`).className = `bg-white/5 hover:bg-white/15 p-4 rounded-2xl border-2 ${i === g ? 'border-amber-400 bg-amber-950/20' : 'border-transparent'} cursor-pointer transition`; }
+        function selectBossDiff(d) {
+            playSound('click'); bossState.diff = d;
+            ['easy', 'normal', 'hard'].forEach(diff => {
+                document.getElementById(`btn-diff-${diff}`).className = diff === d ? `p-3 rounded-xl border-2 ${d==='easy'?'border-green-400 bg-green-950/40':d==='normal'?'border-yellow-400 bg-yellow-950/40':'border-red-500 bg-red-950/40'} text-left transition` : 'p-3 rounded-xl border-2 border-transparent bg-white/5 text-left transition';
+            });
+        }
+
+        function startBossBattle() {
+            if (!bossState.partnerId) { showToast('⚠️', '相棒を選んでね！'); return; }
+            playSound('fanfare');
+            changeBgmMode('boss');
+            isBossProcessing = false;
+            document.getElementById('btn-boss-submit').disabled = false;
+            document.getElementById('boss-setup-view').classList.add('hidden');
+            document.getElementById('boss-battle-view').classList.remove('hidden');
+
+            let partnerM = monstersData.find(x => x.id === bossState.partnerId), partnerC = gameState.caught[bossState.partnerId];
+            let isShinyUse = bossState.partnerShiny && partnerC.shiny;
+            let partnerStats = calculateMonsterStats(partnerM.rarity, isShinyUse, partnerC.powerLevel || 0);
+
+            bossState.partnerHP = partnerStats.hp; bossState.partnerMaxHP = partnerStats.hp;
+            bossState.partnerAtk = partnerStats.atk; bossState.partnerDef = partnerStats.def;
+
+            let bHP = 500, bAtk = 45;
+            if (bossState.diff === 'normal') { bHP = 1800; bAtk = 95; }
+            if (bossState.diff === 'hard') { bHP = 3500; bAtk = 150; }
+
+            bossState.bossHP = bHP; bossState.bossMaxHP = bHP; bossState.bossAtk = bAtk; bossState.isBossTurn = false;
+
+            document.getElementById('boss-grade-badge').innerText = `${bossState.grade}年生ボス: ${bossGradeData[bossState.grade].name}`;
+            document.getElementById('boss-diff-badge').innerText = bossState.diff === 'easy' ? '🟢 イージー' : bossState.diff === 'normal' ? '🟡 ノーマル' : '🔴 ハード';
+
+            document.getElementById('partner-display-svg').innerHTML = getMonsterVisualHTML(partnerM.id, partnerM.rarity, partnerM.isFancy, isShinyUse);
+            document.getElementById('partner-display-name').innerText = (isShinyUse ? '✨' : '') + partnerM.name;
+            document.getElementById('boss-display-svg').innerHTML = getBossSVG(bossState.grade);
+            document.getElementById('boss-display-name').innerText = bossGradeData[bossState.grade].name;
+
+            updateBossBattleBars(); generateBossProblem();
+        }
+
+        function updateBossBattleBars() {
+            let pPct = Math.max(0, (bossState.partnerHP / bossState.partnerMaxHP) * 100);
+            let bPct = Math.max(0, (bossState.bossHP / bossState.bossMaxHP) * 100);
+            document.getElementById('partner-hp-bar').style.width = pPct + '%';
+            document.getElementById('partner-hp-text').innerText = `HP: ${Math.ceil(bossState.partnerHP)}/${bossState.partnerMaxHP}`;
+            document.getElementById('boss-hp-bar').style.width = bPct + '%';
+            document.getElementById('boss-hp-text').innerText = `HP: ${Math.ceil(bossState.bossHP)}/${bossState.bossMaxHP}`;
+        }
+
+        function generateBossProblem() {
+            document.getElementById('boss-ans-input').value = '';
+            bossState.problemStart = Date.now();
+            let g = bossState.grade, text = "", ans = 0;
+            let attempts = 0;
+
+            do {
+                attempts++;
+                if (g === 1) {
+                    let randType = Math.random();
+                    if (randType < 0.4) {
+                        let n1 = Math.floor(Math.random() * 9) + 1;
+                        ans = 10 - n1; text = `${n1} + ? = 10`;
+                    } else if (randType < 0.7) {
+                        let a = Math.floor(Math.random() * 8) + 1, b = Math.floor(Math.random() * 8) + 1;
+                        ans = a + b; text = `${a} + ${b} = ?`;
+                    } else {
+                        let a = Math.floor(Math.random() * 8) + 2, b = Math.floor(Math.random() * (a - 1)) + 1;
+                        ans = a - b; text = `${a} - ${b} = ?`;
+                    }
+                    document.getElementById('boss-crit-timer').innerText = '3.0秒(×2) / 6.0秒(×1.5)';
+                } else if (g === 2) {
+                    let randType = Math.random();
+                    if (randType < 0.5) {
+                        let n1 = Math.floor(Math.random() * 9) + 1, n2 = Math.floor(Math.random() * 9) + 1;
+                        ans = n1 * n2; text = `${n1} × ${n2} = ?`;
+                    } else if (randType < 0.75) {
+                        let a = Math.floor(Math.random() * 8) + 2, q = Math.floor(Math.random() * 9) + 1;
+                        ans = q; text = `${a} × ? = ${a * q}`;
+                    } else {
+                        let a = Math.floor(Math.random() * 20) + 10, b = Math.floor(Math.random() * 8) + 1;
+                        ans = a + b; text = `${a} + ${b} = ?`;
+                    }
+                    document.getElementById('boss-crit-timer').innerText = '2.5秒(×2) / 5.0秒(×1.5)';
+                } else if (g === 3) {
+                    let randType = Math.random();
+                    if (randType < 0.35) {
+                        let n1 = Math.floor(Math.random() * 9) + 1, n2 = Math.floor(Math.random() * 9) + 1;
+                        ans = n1 * n2; text = `${n1} × ${n2} = ?`;
+                    } else if (randType < 0.7) {
+                        let n2 = Math.floor(Math.random() * 8) + 2; ans = Math.floor(Math.random() * 9) + 1;
+                        let n1 = n2 * ans; text = `${n1} ÷ ${n2} = ?`;
+                    } else {
+                        let b = Math.floor(Math.random() * 7) + 3, q = Math.floor(Math.random() * 6) + 2, r = Math.floor(Math.random() * (b - 1)) + 1;
+                        ans = r; text = `${b * q + r} ÷ ${b} のあまりは？`;
+                    }
+                    document.getElementById('boss-crit-timer').innerText = '3.0秒(×2) / 6.0秒(×1.5)';
+                } else {
+                    let n1 = Math.floor(Math.random() * 9) + 2, n2 = Math.floor(Math.random() * 9) + 1, n3 = Math.floor(Math.random() * 10) + 1;
+                    if (Math.random() < 0.5) {
+                        ans = (n1 * n2) + n3; text = `${n1} × ${n2} + ${n3} = ?`;
+                    } else {
+                        ans = (n1 * n2) - n3; text = `${n1} × ${n2} - ${n3} = ?`;
+                    }
+                    document.getElementById('boss-crit-timer').innerText = '4.0秒(×2) / 8.0秒(×1.5)';
+                }
+            } while (bossProblemHistory.includes(text) && attempts < 20);
+
+            bossProblemHistory.push(text);
+            if (bossProblemHistory.length > 5) bossProblemHistory.shift();
+
+            bossState.currentProblemAns = ans;
+            document.getElementById('boss-problem-text').innerText = text;
+            document.getElementById('boss-phase-title').innerText = bossState.isBossTurn ? '🛡️ ボスの攻撃！早解きガードで受け止めろ！' : '⚔️ 攻撃フェーズ！早解きで攻撃力アップ！';
+        }
+
+        function inputBossNum(val) {
+            playSound('click'); let inp = document.getElementById('boss-ans-input');
+            if(val === 'clear') inp.value = ''; else if(val === 'minus') { if(!inp.value.startsWith('-')) inp.value = '-' + inp.value; } else { if(inp.value.length < 5) inp.value += val; }
+        }
+
+        function submitBossAnswer() {
+            if (isBossProcessing) return;
+            let val = parseInt(document.getElementById('boss-ans-input').value);
+            if(isNaN(val)) return;
+            let timeSec = (Date.now() - bossState.problemStart) / 1000;
+            let fastLimit = bossState.grade === 2 ? 2.5 : bossState.grade === 4 ? 4.0 : 3.0;
+            let midLimit = bossState.grade === 2 ? 5.0 : bossState.grade === 4 ? 8.0 : 6.0;
+
+            if (val === bossState.currentProblemAns) {
+                if (!bossState.isBossTurn) {
+                    let speedMult = timeSec <= fastLimit ? 2.0 : timeSec <= midLimit ? 1.5 : 1.0;
+                    
+                    let typeMult = 1.0;
+                    let dmg = bossState.partnerAtk * 12 * speedMult * typeMult;
+                    
+                    bossState.bossHP -= dmg;
+                    playSound(speedMult > 1 ? 'critical' : 'correct');
+                    showToast(speedMult === 2.0 ? '⚡ LIGHTNING FAST! (×2)' : speedMult === 1.5 ? '✨ FAST! (×1.5)' : '⚔️ HIT!', `ボスに ${Math.ceil(dmg)} ダメージ！`, '', 1100);
+                    updateBossBattleBars();
+
+                    if (bossState.bossHP <= 0) { 
+                        isBossProcessing = true;
+                        document.getElementById('btn-boss-submit').disabled = true;
+                        onBossVictory(); 
+                        return; 
+                    }
+                    bossState.isBossTurn = true; generateBossProblem();
+                } else {
+                    let isGuardSuccess = timeSec <= midLimit;
+                    let reducedDmg = isGuardSuccess ? Math.max(5, bossState.bossAtk - bossState.partnerDef) : bossState.bossAtk * 1.5;
+                    bossState.partnerHP -= reducedDmg;
+                    playSound(isGuardSuccess ? 'correct' : 'wrong');
+                    showToast(isGuardSuccess ? '🛡️ GUARD SUCCESS!' : '💥 GUARD FAILED!', `相棒が ${Math.ceil(reducedDmg)} ダメージを受けた！`, '', 1200);
+                    updateBossBattleBars();
+
+                    if (bossState.partnerHP <= 0) {
+                        isBossProcessing = true;
+                        document.getElementById('btn-boss-submit').disabled = true;
+                        playSound('wrong');
+                        showToast('💦', '敗北...', '相棒のHPがなくなってしまった！モンスターを強化して再挑戦しよう！', 2000, () => {
+                            document.getElementById('boss-battle-view').classList.add('hidden');
+                            document.getElementById('boss-setup-view').classList.remove('hidden');
+                            changeBgmMode('home');
+                        });
+                        return;
+                    }
+                    bossState.isBossTurn = false; generateBossProblem();
+                }
+            } else {
+                playSound('wrong');
+                document.getElementById('boss-ans-input').classList.add('border-red-500');
+                setTimeout(() => document.getElementById('boss-ans-input').classList.remove('border-red-500'), 400);
+            }
+        }
+
+        function onBossVictory() {
+            playSound('fanfare');
+            let coins = bossState.diff === 'hard' ? 1000 : bossState.diff === 'normal' ? 300 : 100;
+            let gems = bossState.diff === 'hard' ? 15 : bossState.diff === 'normal' ? 5 : 2;
+
+            let rChance = bossState.diff === 'hard' ? 1.0 : bossState.diff === 'normal' ? 0.35 : 0.10;
+            let rCount = 0;
+            if (Math.random() < rChance) {
+                rCount = Math.floor(Math.random() * 3) + 1;
+                gameState.rainbowPieces += rCount;
+            }
+
+            let tInfo = bossGradeData[bossState.grade];
+            let unlockedTitle = false;
+            let unlockedTheme = false;
+
+            if (bossState.diff === 'hard') {
+                let themeKey = `boss${bossState.grade}`;
+                if (!gameState.unlockedBossThemes.includes(themeKey)) {
+                    gameState.unlockedBossThemes.push(themeKey);
+                    unlockedTheme = true;
+                }
+            }
+
+            let dropChance = bossState.diff === 'hard' ? 0.30 : bossState.diff === 'normal' ? 0.10 : 0.01;
+            if (Math.random() < dropChance) {
+                if (!gameState.unlockedTitles.includes(tInfo.title)) {
+                    gameState.unlockedTitles.push(tInfo.title);
+                    unlockedTitle = true;
+                }
+            }
+
+            gameState.coins += coins; gameState.gems += gems;
+            saveGame(); updateHeader();
+
+            let rewardMsg = `🪙 +${coins}G | 💎 +${gems}個`;
+            if (rCount > 0) rewardMsg += ` | 🌈虹のかけら +${rCount}個`;
+            if (unlockedTheme) rewardMsg += ` | 🎨限定ボステーマ開放!`;
+            if (unlockedTitle) rewardMsg += ` | 👑限定称号GET!`;
+
+            showEpicFX('👑🎉🐉', 'ボス撃破！！完全勝利！！', rewardMsg, () => {
+                document.getElementById('boss-battle-view').classList.add('hidden');
+                document.getElementById('boss-setup-view').classList.remove('hidden');
+                changeBgmMode('home');
+            });
+        }
+
+        function renderTitlesRoom() {
+            let list = document.getElementById('unlocked-titles-list');
+            list.innerHTML = '';
+            if (gameState.unlockedTitles.length === 0) {
+                list.innerHTML = '<span class="text-gray-400 text-xs">まだ獲得した称号はありません。ボス戦に挑もう！</span>';
+                return;
+            }
+            gameState.unlockedTitles.forEach(t => {
+                let span = document.createElement('span');
+                span.className = 'bg-amber-500/20 border border-amber-400 text-yellow-300 font-bold px-3 py-1 rounded-xl text-xs';
+                span.innerText = `👑 ${t}`;
+                list.appendChild(span);
+            });
+        }
+
+        let currentDexTab = 'normal';
+        function setDexTab(tab) {
+            playSound('click'); currentDexTab = tab;
+            document.getElementById('tab-dex-normal').className = 'px-3 py-1.5 rounded-xl text-xs font-bold ' + (tab === 'normal' ? 'bg-purple-600 text-white' : 'bg-white/10 hover:bg-white/25');
+            document.getElementById('tab-dex-shiny').className = 'px-3 py-1.5 rounded-xl text-xs font-bold ' + (tab === 'shiny' ? 'bg-pink-600 text-white' : 'bg-white/10 hover:bg-white/25');
+            document.getElementById('tab-dex-s1-normal').className = 'px-3 py-1.5 rounded-xl text-xs font-bold ' + (tab === 's1_normal' ? 'bg-amber-600 text-white' : 'bg-white/10 hover:bg-white/25');
+            document.getElementById('tab-dex-s1-shiny').className = 'px-3 py-1.5 rounded-xl text-xs font-bold ' + (tab === 's1_shiny' ? 'bg-pink-500 text-white' : 'bg-white/10 hover:bg-white/25');
+            renderPokedex();
+        }
+
+        function updateDexCounts() {
+            let normalCount = getNormalCaughtCount(), shinyCount = getShinyCaughtCount();
+            document.getElementById('count-dex-normal').innerText = normalCount;
+            document.getElementById('count-dex-shiny').innerText = shinyCount;
+            document.getElementById('count-dex-s1-normal').innerText = getS1NormalCaughtCount();
+            document.getElementById('count-dex-s1-shiny').innerText = getS1ShinyCaughtCount();
+            if(normalCount >= 150 && shinyCount >= 150) document.getElementById('all-clear-badge').classList.remove('hidden');
+        }
+
+        function getS1NormalCaughtCount() { let c = 0; for(let i=151; i<=160; i++) if(gameState.caught[i]?.count > 0) c++; return c; }
+        function getS1ShinyCaughtCount() { let c = 0; for(let i=151; i<=160; i++) if(gameState.caught[i]?.shiny) c++; return c; }
+
+        function renderPokedex() {
+            updateDexCounts();
+            let grid = document.getElementById('pokedex-grid'); grid.innerHTML = '';
+            let filtered = (currentDexTab.startsWith('s1')) ? monstersData.filter(m => m.isSeason1) : monstersData.filter(m => !m.isSeason1);
+
+            filtered.forEach(m => {
+                let c = gameState.caught[m.id], isUnlocked = currentDexTab === 'shiny' || currentDexTab === 's1_shiny' ? c?.shiny : c?.count > 0;
+                let isEquipped = gameState.equippedSkinId === m.id && gameState.equippedSkinShiny === (currentDexTab === 'shiny' || currentDexTab === 's1_shiny');
+                let card = document.createElement('div');
+                card.className = `p-3 rounded-2xl border flex flex-col items-center justify-between cursor-pointer transition relative ${isUnlocked && (currentDexTab==='shiny'||currentDexTab==='s1_shiny') ? 'holo-card transform hover:scale-105' : isUnlocked ? 'bg-white/10 border-white/25 hover:bg-white/20' : 'bg-black/30 border-white/5 opacity-40'}`;
+                card.onclick = () => openModal(m.id);
+                let displayShiny = currentDexTab === 'shiny' || currentDexTab === 's1_shiny';
+                card.innerHTML = `
+                    ${isEquipped ? '<span class="absolute top-1 left-1 bg-yellow-400 text-black text-[9px] font-black px-1.5 py-0.5 rounded-full z-10">装着中</span>' : ''}
+                    <span class="text-xs font-bold ${displayShiny?'text-yellow-200':'text-purple-300'}">#${String(m.id).padStart(3, '0')}</span>
+                    <div class="w-16 h-16 my-1 flex items-center justify-center overflow-hidden rounded-xl">${isUnlocked ? getMonsterVisualHTML(m.id, m.rarity, m.isFancy, displayShiny) : '<span class="text-2xl">❓</span>'}</div>
+                    <span class="text-xs font-bold truncate w-full text-center">${isUnlocked ? m.name : '？？？'}</span>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        let viewingMonsterId = null;
+        function openModal(id) {
+            viewingMonsterId = id; let m = monstersData.find(x => x.id === id), c = gameState.caught[id];
+            let isShinyTab = currentDexTab === 'shiny' || currentDexTab === 's1_shiny';
+            if(!c || (isShinyTab && !c.shiny) || (!isShinyTab && c.count <= 0)) return;
+
+            document.getElementById('modal-name').innerText = (isShinyTab ? '✨色違い ' : '') + m.name;
+            document.getElementById('modal-type-badge').innerHTML = getTypeBadgeHTML(m.type);
+            document.getElementById('modal-rarity-badge').innerText = `レア度: ★${m.rarity}`;
+            document.getElementById('modal-desc').innerText = m.desc;
+            document.getElementById('modal-caught-count').innerText = c.count;
+            
+            let pLvl = c.powerLevel || 0;
+            document.getElementById('modal-power-lvl').innerText = pLvl;
+            document.getElementById('modal-svg-box').innerHTML = getMonsterVisualHTML(m.id, m.rarity, m.isFancy, isShinyTab);
+
+            let stats = calculateMonsterStats(m.rarity, isShinyTab, pLvl);
+            document.getElementById('modal-stat-hp').innerText = stats.hp;
+            document.getElementById('modal-stat-atk').innerText = stats.atk;
+            document.getElementById('modal-stat-def').innerText = stats.def;
+
+            let powerUpBtn = document.getElementById('btn-powerup-monster');
+            if (pLvl >= 10) {
+                powerUpBtn.innerText = '✨ 強化は上限LV.10に達しています';
+                powerUpBtn.className = 'w-full bg-gray-600 text-gray-300 font-black py-2 rounded-xl shadow-lg text-xs cursor-not-allowed';
+                powerUpBtn.disabled = true;
+            } else {
+                powerUpBtn.innerText = '🌈 虹のかけらで強化する (3個消費 / HP・ATK・DEF +15%)';
+                powerUpBtn.className = 'w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:opacity-90 text-white font-black py-2 rounded-xl shadow-lg text-xs';
+                powerUpBtn.disabled = false;
+            }
+
+            let isEquipped = gameState.equippedSkinId === viewingMonsterId && gameState.equippedSkinShiny === isShinyTab;
+            let equipBtn = document.getElementById('btn-equip-skin');
+            if (isEquipped) {
+                equipBtn.innerText = '👑 装着中のスキンを取り外す';
+                equipBtn.className = 'w-full bg-red-600/80 hover:bg-red-600 text-white font-black py-2 rounded-xl shadow-lg text-xs';
+            } else {
+                equipBtn.innerText = '👑 この姿をキャラカードスキンに装着する';
+                equipBtn.className = 'w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:opacity-90 text-black font-black py-2 rounded-xl shadow-lg text-xs';
+            }
+
+            document.getElementById('modal-dex').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('modal-dex').classList.add('hidden'); }
+
+        function toggleMonsterSkin() {
+            let isShinyTab = currentDexTab === 'shiny' || currentDexTab === 's1_shiny';
+            let isEquipped = gameState.equippedSkinId === viewingMonsterId && gameState.equippedSkinShiny === isShinyTab;
+
+            if (isEquipped) {
+                gameState.equippedSkinId = null;
+                gameState.equippedSkinShiny = false;
+                showToast('👑', 'スキン解除', 'キャラカードスキンを取り外しました！');
+            } else {
+                gameState.equippedSkinId = viewingMonsterId;
+                gameState.equippedSkinShiny = isShinyTab;
+                showToast('👑', 'スキン装着！', 'キャラカードの見た目を変更しました！');
+            }
+            saveGame();
+            closeModal();
+            renderPokedex();
+        }
+
+        function powerUpCurrentMonster() {
+            let c = gameState.caught[viewingMonsterId];
+            if ((c.powerLevel || 0) >= 10) { showToast('⚠️', 'これ以上強化できません', '強化上限（LV.10）に達しています！'); return; }
+            if (gameState.rainbowPieces < 3) { showToast('⚠️', '虹のかけらが足りない！', '必要: 3個 (ラッキーやボス戦で入手)'); return; }
+            
+            gameState.rainbowPieces -= 3;
+            c.powerLevel = (c.powerLevel || 0) + 1;
+            saveGame(); updateHeader();
+
+            let m = monstersData.find(x => x.id === viewingMonsterId), isShinyTab = currentDexTab === 'shiny' || currentDexTab === 's1_shiny';
+            let stats = calculateMonsterStats(m.rarity, isShinyTab, c.powerLevel);
+            document.getElementById('modal-power-lvl').innerText = c.powerLevel;
+            document.getElementById('modal-stat-hp').innerText = stats.hp;
+            document.getElementById('modal-stat-atk').innerText = stats.atk;
+            document.getElementById('modal-stat-def').innerText = stats.def;
+
+            if (c.powerLevel >= 10) {
+                let powerUpBtn = document.getElementById('btn-powerup-monster');
+                powerUpBtn.innerText = '✨ 強化は上限LV.10に達しています';
+                powerUpBtn.className = 'w-full bg-gray-600 text-gray-300 font-black py-2 rounded-xl shadow-lg text-xs cursor-not-allowed';
+                powerUpBtn.disabled = true;
+            }
+
+            showToast('🌈', 'ステータス強化！', `ステータスが +15% アップした！ (LV.${c.powerLevel}/10)`);
+        }
+
+        function setShopTab(tab) {
+            playSound('click');
+            if(tab === 'coins') {
+                document.getElementById('shop-coins-view').classList.remove('hidden'); document.getElementById('shop-gems-view').classList.add('hidden');
+                document.getElementById('tab-btn-coins').className = 'px-4 py-1.5 rounded-xl text-xs font-bold bg-yellow-500 text-black';
+                document.getElementById('tab-btn-gems').className = 'px-4 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20';
+            } else {
+                document.getElementById('shop-coins-view').classList.add('hidden'); document.getElementById('shop-gems-view').classList.remove('hidden');
+                document.getElementById('tab-btn-coins').className = 'px-4 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20';
+                document.getElementById('tab-btn-gems').className = 'px-4 py-1.5 rounded-xl text-xs font-bold bg-pink-500 text-white';
+                updateGodStoneShopStatus();
+                renderBossThemeList();
+            }
+        }
+
+        function updateGodStoneShopStatus() {
+            let normalCount = getNormalCaughtCount(), btn = document.getElementById('btn-god-stone'), desc = document.getElementById('god-stone-desc'), box = document.getElementById('god-stone-shop-box');
+            if (normalCount < 150) {
+                btn.disabled = true; btn.className = 'bg-gray-600 text-gray-400 px-4 py-2 rounded-xl font-bold text-sm cursor-not-allowed'; btn.innerText = `未解放 (${normalCount}/150)`;
+                desc.innerText = `ノーマル図鑑を150体コンプリートすると開放されます！（現在: ${normalCount}/150）`; box.classList.add('opacity-50');
+            } else {
+                btn.disabled = false; btn.className = 'bg-amber-500 text-black hover:bg-amber-400 px-4 py-2 rounded-xl font-bold text-sm'; btn.innerText = '召喚する';
+                desc.innerText = `最高レア★5神話生物＆【シャイニー確定】！`; box.classList.remove('opacity-50');
+            }
+        }
+
+        function updateShopUI() { updateGodStoneShopStatus(); renderBossThemeList(); }
+
+        function buyItem(type, price) {
+            if(gameState.coins < price) { showToast('⚠️', 'コインが足りない！'); return; }
+            gameState.coins -= price; gameState.balls[type]++; saveGame(); updateHeader();
+            showToast('🛒', '購入かんりょう！', `${type}ボールを手に入れた！`);
+        }
+
+        function exchangeGem(type, cost) {
+            if (isExchangingGem) return;
+            if (type === 'god_stone' && getNormalCaughtCount() < 150) { showToast('⚠️', 'まだ開放されていません'); return; }
+            if(gameState.gems < cost) { showToast('⚠️', 'ダイヤが足りない！'); return; }
+            isExchangingGem = true; gameState.gems -= cost;
+
+            let mythList = monstersData.filter(m => m.isMythOnly);
+            if(type === 'god_stone') mythList = mythList.filter(m => m.rarity === 5);
+            let summoned = mythList[Math.floor(Math.random() * mythList.length)], id = summoned.id;
+
+            if(!gameState.caught[id]) gameState.caught[id] = { count: 0, shiny: false, powerLevel: 0 };
+            gameState.caught[id].count++;
+            let isShiny = (type === 'god_stone') || (Math.random() < 0.10);
+            if(isShiny) gameState.caught[id].shiny = true;
+            saveGame(); updateHeader();
+
+            showEpicFX(isShiny ? '✨👑✨' : '🦄✨', isShiny ? '神話シャイニー確定召喚！！' : '★5 神話モンスター召喚！', `「${summoned.name}」を獲得した！`, () => {
+                isExchangingGem = false; checkCompletionAndCelebrate();
+            });
+        }
+
+        function updateSkillsUI() {
+            document.getElementById('sp-val').innerText = gameState.sp;
+            document.getElementById('skill-coin-lvl').innerText = gameState.skills.coin;
+            document.getElementById('skill-drop-lvl').innerText = gameState.skills.drop;
+        }
+
+        function upgradeSkill(type) {
+            if(gameState.sp <= 0) { showToast('⚠️', 'SPが足りない！'); return; }
+            gameState.sp--; gameState.skills[type]++; saveGame(); updateSkillsUI(); updateHeader();
+            showToast('⭐', '能力アップ！', 'スキルを鍛えた！');
+        }
+
+        function renderTreasures() {
+            let grid = document.getElementById('treasures-grid'); grid.innerHTML = '';
+            treasuresData.forEach(t => {
+                let count = gameState.treasures[t.id] || 0;
+                let card = document.createElement('div');
+                card.className = `p-4 rounded-2xl border flex flex-col items-center justify-center text-center ${count > 0 ? 'bg-white/10 border-yellow-400/50 shadow-lg' : 'bg-black/30 border-white/5 opacity-40'}`;
+                card.innerHTML = `<span class="text-4xl mb-2">${t.icon}</span><h4 class="font-bold text-xs text-yellow-200">${t.name}</h4><p class="text-[10px] text-purple-200 my-1">${t.desc}</p><span class="text-xs font-bold text-cyan-300">所持数: ${count}</span>`;
+                grid.appendChild(card);
+            });
+        }
+
+        applyTheme(gameState.currentTheme || 'default');
+        updateHeader();
+        checkCompletionAndCelebrate();
+    </script>
+</body>
+</html>
